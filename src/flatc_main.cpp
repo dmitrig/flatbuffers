@@ -19,6 +19,7 @@
 
 #include "bfbs_gen_lua.h"
 #include "bfbs_gen_nim.h"
+#include "bfbs_gen_ocaml.h"
 #include "flatbuffers/base.h"
 #include "flatbuffers/code_generator.h"
 #include "flatbuffers/flatc.h"
@@ -169,6 +170,11 @@ int main(int argc, const char *argv[]) {
       flatbuffers::FlatCOption{ "T", "ts", "",
                                 "Generate TypeScript code for tables/structs" },
       flatbuffers::NewTsCodeGenerator());
+
+  flatc.RegisterCodeGenerator(
+      flatbuffers::FlatCOption{ "", "ocaml", "",
+                                "Generate OCaml code for tables/structs" },
+      flatbuffers::NewOCamlBfbsGenerator(flatbuffers_version));
 
   // Create the FlatC options by parsing the command line arguments.
   const flatbuffers::FlatCOptions &options =

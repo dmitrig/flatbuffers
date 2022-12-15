@@ -1,0 +1,15 @@
+; run with `dune exec --profile=release --display=quiet tests/bench/fb_bench.exe`
+; add `MEMTRACE=$PWD/trace.ctf` to run with memtrace
+; run viewer with: `echo trace.ctf | entr -rz memtrace-viewer /_`
+
+(executable
+ (name monster_bench)
+ (modules monster_bench)
+ (libraries benchmark memtrace generated)
+ (modes exe))
+
+(executable
+ (name fb_bench)
+ (modules fb_bench)
+ (libraries benchmark memtrace generated)
+ (modes exe))

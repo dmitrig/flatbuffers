@@ -182,6 +182,7 @@ set(FlatBuffers_Compiler_SRCS
   src/bfbs_gen.h
   src/bfbs_gen_lua.h
   src/bfbs_gen_nim.h
+  src/bfbs_gen_ocaml.h
   src/bfbs_namer.h
   include/flatbuffers/code_generators.h
   src/binary_annotator.h
@@ -190,6 +191,7 @@ set(FlatBuffers_Compiler_SRCS
   src/annotated_binary_text_gen.cpp
   src/bfbs_gen_lua.cpp
   src/bfbs_gen_nim.cpp
+  src/bfbs_gen_ocaml.cpp
   src/code_generators.cpp
   grpc/src/compiler/schema_interface.h
   grpc/src/compiler/cpp_generator.h

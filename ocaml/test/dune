@@ -1,0 +1,28 @@
+(library
+ (name fixtures)
+ (modules fixtures)
+ (libraries generated alcotest)
+ (modes byte))
+
+(tests
+ (names sample_binary main_test)
+ (modules :standard \ fixtures wire_data_test)
+ (deps
+  (file ../../tests/monsterdata_test.mon)
+  (file ../../tests/monsterdata_python_wire.mon))
+ (libraries generated fixtures alcotest)
+ (modes byte))
+
+(executable
+ (name wire_data_test)
+ (modules wire_data_test)
+ (libraries generated fixtures)
+ (modes byte))
+
+(rule
+ (alias runtest)
+ (action
+  (progn
+   (with-stdout-to monsterdata_ocaml_wire.output
+    (run ./wire_data_test.bc))
+   (diff? ./monsterdata_ocaml_wire.mon ./monsterdata_ocaml_wire.output))))
