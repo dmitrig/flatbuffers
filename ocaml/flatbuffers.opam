@@ -15,7 +15,7 @@ depends: [
   "bigstringaf"
   "memtrace" {with-test}
   "benchmark" {with-test}
-  "alcotest" {"1.7" >= with-test}
+  "alcotest" {>= "1.7" & with-test}
   "odoc" {with-doc}
 ]
 build: [

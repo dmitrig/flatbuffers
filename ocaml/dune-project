@@ -24,7 +24,7 @@
    bigstringaf
   (memtrace :with-test)
   (benchmark :with-test)
-  (alcotest (>= 1.7 :with-test)))
+  (alcotest (and :with-test (>= 1.7))))
  (tags
   (topics "to describe" your project)))
 
