@@ -1,5 +1,5 @@
-(* see: fb_bench.cpp *)
-open Generated.Bench.Make (Flatbuffers.BigstringRuntime)
+(* see: benchmarks/cpp/flatbuffers/fb_bench.cpp *)
+open Generated.Bench.Make (Flatbuffers.StringRuntime)
 open BenchmarksFlatbuffers
 
 let encode b =
@@ -86,7 +86,7 @@ let () =
   (* set up monster data and builder *)
   let b = Rt.Builder.create () in
   let buf = encode b |> FooBarContainer.finish_buf b in
-  Printf.printf "Buffer size: %d\n" (Bigstringaf.length buf);
+  Printf.printf "Buffer size: %d\n" (String.length buf);
   (* check sum *)
   assert (use buf = 218812692406581874);
   (* benchmark read *)

@@ -1,3 +1,4 @@
+(* see: samples/sample_binary.cpp *)
 open Generated.Monster.Make (Flatbuffers.StringRuntime)
 open MyGame.Sample
 

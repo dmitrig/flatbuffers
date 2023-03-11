@@ -1,7 +1,7 @@
 open Generated.Monster.Make (Flatbuffers.BigstringRuntime)
 open MyGame.Sample
 
-let[@inline] read_vec3 buf p =
+let read_vec3 buf p =
   ignore (Vec3.x buf p);
   ignore (Vec3.y buf p);
   ignore (Vec3.z buf p)
@@ -10,7 +10,7 @@ let[@inline] read_vec3 buf p =
 let ignore2 _ _ = ()
 let read_string buf s = Rt.String.iter buf ignore2 s
 
-let[@inline] read_weapon buf w =
+let read_weapon buf w =
   Weapon.name buf w |> Rt.Option.get |> read_string buf;
   Weapon.damage buf w |> ignore
 ;;

@@ -1,2 +1,3 @@
-module Make (Primitives : Primitives_intf.Intf) :
-  Builder_intf.Intf with module T := Primitives.T
+module type Intf = Builder_intf.Intf
+
+include Intf with module T = Primitives.T

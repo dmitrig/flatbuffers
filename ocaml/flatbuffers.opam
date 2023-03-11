@@ -13,9 +13,10 @@ depends: [
   "dune" {>= "3.4"}
   "ocaml" {>= "4.08"}
   "bigstringaf"
+  "cppo" {build & >= "1.1.0"}
   "memtrace" {with-test}
   "benchmark" {with-test}
-  "alcotest" {>= "1.7" & with-test}
+  "alcotest" {with-test & >= "1.7"}
   "odoc" {with-doc}
 ]
 build: [

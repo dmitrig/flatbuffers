@@ -1,4 +1,4 @@
-module Make (Primitives : Primitives.Intf) = struct
+module Builder = struct
   (* flatbuffers constructed back-to-front. Offsets are relative to the end of the buffer *)
   type offset = int
 
