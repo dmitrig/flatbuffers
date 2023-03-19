@@ -20,7 +20,7 @@
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends
-  (ocaml (>= 4.08))
+  (ocaml (>= 4.13))
    bigstringaf
   (cppo (and :build (>= 1.1.0)))
   (memtrace :with-test)
