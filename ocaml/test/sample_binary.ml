@@ -1,5 +1,5 @@
 (* see: samples/sample_binary.cpp *)
-open Generated.Monster.Make (Flatbuffers.StringRuntime)
+open Generated.Monster
 open MyGame.Sample
 
 let main () =
@@ -24,9 +24,9 @@ let main () =
       |> add_equipped_weapon axe
       |> finish)
   in
-  let buf = Monster.finish_buf b orc in
+  let buf = Monster.finish_buf Flatbuffers.Primitives.String b orc in
   (* read back serialized data *)
-  let (Rt.Root (b, monster)) = Monster.root buf in
+  let (Rt.Root (b, monster)) = Monster.root Flatbuffers.Primitives.String buf in
   assert (Monster.hp b monster = 80);
   assert (Monster.mana b monster = 150);
   assert (Monster.name b monster |> Rt.Option.get |> Rt.String.to_string b = "MyMonster");

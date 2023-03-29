@@ -1,5 +1,5 @@
 (* see: benchmarks/cpp/flatbuffers/fb_bench.cpp *)
-open Generated.Bench.Make (Flatbuffers.StringRuntime)
+open Generated.Bench
 open BenchmarksFlatbuffers
 
 let encode b =
@@ -37,7 +37,7 @@ let encode b =
 
 let use buf =
   let sum = ref 0 in
-  let (Rt.Root (buf, fbc)) = FooBarContainer.root buf in
+  let (Rt.Root (buf, fbc)) = FooBarContainer.root Flatbuffers.Primitives.String buf in
   sum := !sum + (FooBarContainer.initialized buf fbc |> Bool.to_int);
   sum := !sum + (FooBarContainer.location buf fbc |> Rt.Option.get |> Rt.String.length buf);
   sum := !sum + (FooBarContainer.fruit buf fbc :> int);
@@ -85,7 +85,7 @@ let () =
   Memtrace.trace_if_requested ();
   (* set up monster data and builder *)
   let b = Rt.Builder.create () in
-  let buf = encode b |> FooBarContainer.finish_buf b in
+  let buf = encode b |> FooBarContainer.finish_buf Flatbuffers.Primitives.String b in
   Printf.printf "Buffer size: %d\n" (String.length buf);
   (* check sum *)
   assert (use buf = 218812692406581874);

@@ -4,8 +4,7 @@
     flatc version: 23.3.3
 *)
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) : sig
-module Rt : Flatbuffers.Runtime.Intf with module T := R.T
+module Rt : Flatbuffers.Runtime.Intf
 
 (* Table TableA (//include_test/include_test1.fbs) *)
 module rec TableA : sig
@@ -320,9 +319,9 @@ and MyGame : sig
 
       val extension : string option
       val identifier : string option
-      val has_identifier : ?size_prefixed:bool -> ?off:int -> R.T.buf -> bool
-      val root : ?size_prefixed:bool -> ?off:int -> R.T.buf -> t Rt.root
-      val finish_buf : ?size_prefixed:bool -> Rt.Builder.t -> t Rt.wip -> R.T.buf
+      val has_identifier : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> bool
+      val root : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> t Rt.root
+      val finish_buf : ?size_prefixed:bool -> 'a Flatbuffers.Primitives.t -> Rt.Builder.t -> t Rt.wip -> 'a
 
       val pos : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Vec3.t) Rt.fbopt
       val mana : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Short.t
@@ -471,4 +470,3 @@ and MyGame : sig
     end
   end (* Example *)
 end (* MyGame *)
-end

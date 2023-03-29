@@ -4,8 +4,7 @@
     flatc version: 23.3.3
 *)
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) : sig
-module Rt : Flatbuffers.Runtime.Intf with module T := R.T
+module Rt : Flatbuffers.Runtime.Intf
 
 module rec MyGame : sig
   module rec Sample : sig
@@ -68,8 +67,8 @@ module rec MyGame : sig
 
       val extension : string option
       val identifier : string option
-      val root : ?size_prefixed:bool -> ?off:int -> R.T.buf -> t Rt.root
-      val finish_buf : ?size_prefixed:bool -> Rt.Builder.t -> t Rt.wip -> R.T.buf
+      val root : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> t Rt.root
+      val finish_buf : ?size_prefixed:bool -> 'a Flatbuffers.Primitives.t -> Rt.Builder.t -> t Rt.wip -> 'a
 
       val pos : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Vec3.t) Rt.fbopt
       val mana : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Short.t
@@ -100,4 +99,3 @@ module rec MyGame : sig
     end
   end (* Sample *)
 end (* MyGame *)
-end

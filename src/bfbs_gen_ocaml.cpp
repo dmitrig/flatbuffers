@@ -111,10 +111,6 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
     // generate user-facing modules
     EmitCode(intf, impl);
 
-    // footer
-    impl += "end\n";
-    intf += "end\n";
-
     WriteFiles(intf, impl);
     return OK;
   }
@@ -358,27 +354,31 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
       if (!ident.empty()) {
         intf += indent +
                 "val has_identifier : ?size_prefixed:bool -> ?off:int -> "
-                "R.T.buf -> bool\n";
+                "'b Flatbuffers.Primitives.t -> 'b -> bool\n";
         impl +=
             indent +
-            "let has_identifier ?(size_prefixed = false) ?(off = 0) b = " +
+            "let has_identifier ?(size_prefixed = false) ?(off = 0) p b = " +
             RuntimeNS +
-            ".get_identifier b ~size_prefixed ~off = Option.get identifier\n";
+            ".get_identifier p b ~size_prefixed ~off = Option.get identifier\n";
       }
 
       intf += indent +
-              "val root : ?size_prefixed:bool -> ?off:int -> R.T.buf -> t " +
+              "val root : ?size_prefixed:bool -> ?off:int -> 'b "
+              "Flatbuffers.Primitives.t "
+              "-> 'b -> t " +
               RuntimeNS + ".root\n";
       impl += indent +
-              "let root ?(size_prefixed = false) ?(off = 0) b = " + RuntimeNS +
-              ".get_root b ~size_prefixed ~off\n";
+              "let[@inline] root ?(size_prefixed = false) ?(off = 0) p b = " +
+              RuntimeNS + ".get_root p b ~size_prefixed ~off\n";
 
       if (schema_->root_table() == object) {
-        intf += indent +
-                "val finish_buf : ?size_prefixed:bool -> Rt.Builder.t -> t "
-                "Rt.wip -> R.T.buf\n\n";
-        impl += indent + "let finish_buf = " + RuntimeNS +
-                ".Builder.finish ?identifier\n\n";
+        intf +=
+            indent +
+            "val finish_buf : ?size_prefixed:bool -> 'a "
+            "Flatbuffers.Primitives.t -> Rt.Builder.t -> t Rt.wip -> 'a\n\n";
+        impl += indent +
+                "let finish_buf ?(size_prefixed = false) = " + RuntimeNS +
+                ".Builder.finish ?identifier ~size_prefixed\n\n";
       }
     }
 
@@ -408,7 +408,7 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
 
       // generate accessor implementation
       if (object->is_struct()) {
-        impl += indent + "let " + namer_.Function(field_name) +
+        impl += indent + "let[@inline] " + namer_.Function(field_name) +
                 " b s = " + GenerateImplNs(field->type()) +
                 ".read_offset b s " + NumToString(field->offset()) + "\n";
       } else {
@@ -416,9 +416,10 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
           auto ns = GenerateIntfNs(field->type(), obj_name);
           auto args = GenerateUnionArgs(field->type());
           // TODO(dmitrig): default tag may not be stored, need default arg
-          impl += indent + "let " + namer_.Function(field_name) + args +
-                  " b o = Union." + UnionReadIdent(GetEnum(field->type())) +
-                  " b " + NumToString(field->offset()) + " (" + field_name +
+          impl += indent + "let[@inline] " + namer_.Function(field_name) +
+                  args + " b o = Union." +
+                  UnionReadIdent(GetEnum(field->type())) + " b " +
+                  NumToString(field->offset()) + " (" + field_name +
                   UnionTypeFieldSuffix() + " b o)" + args + " o\n";
         } else {
           std::string getter_fn, default_arg;
@@ -430,7 +431,7 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
             getter_fn = ".(read_table_default";
             default_arg = " ~default:(" + GenerateDefault(field) + "))";
           }
-          impl += indent + "let " + namer_.Function(field_name) +
+          impl += indent + "let[@inline] " + namer_.Function(field_name) +
                   " b o = " + GenerateImplNs(field->type()) + getter_fn +
                   " b o " + NumToString(field->offset()) + default_arg + "\n";
         }
@@ -783,11 +784,9 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
     // runtime library
     impl += "[@@@warning \"-32\"]\n\n";  // turn off unused-value-declaration
 
-    impl += "module Make (R : Flatbuffers.Runtime.Intf_impl) = struct\n";
-    impl += "module Rt = R\n\n";
+    impl += "module Rt = Flatbuffers.Runtime\n\n";
 
-    intf += "module Make (R : Flatbuffers.Runtime.Intf_impl) : sig\n";
-    intf += "module Rt : Flatbuffers.Runtime.Intf with module T := R.T\n\n";
+    intf += "module Rt : Flatbuffers.Runtime.Intf\n\n";
   }
 
   void EmitCode(std::string &intf, std::string &impl) {

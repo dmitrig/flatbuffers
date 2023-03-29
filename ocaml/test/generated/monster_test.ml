@@ -6,8 +6,7 @@
 
 [@@@warning "-32"]
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) = struct
-module Rt = R
+module Rt = Flatbuffers.Runtime
 
 module Struct = struct
 
@@ -74,7 +73,7 @@ module TableA = struct
 
   module Vector = Rt.Ref.Vector
 
-  let b b o = Rt.Ref.read_table_opt b o 4
+  let[@inline] b b o = Rt.Ref.read_table_opt b o 4
 
   module Builder = struct
     type t = Rt.Builder.t
@@ -105,7 +104,7 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 4 let set = Struct.set_unused__9 end)
 
-      let a b s = Rt.Int.read_offset b s 0
+      let[@inline] a b s = Rt.Int.read_offset b s 0
     end
 
     module TableB = struct
@@ -113,7 +112,7 @@ module MyGame = struct
 
       module Vector = Rt.Ref.Vector
 
-      let a b o = Rt.Ref.read_table_opt b o 4
+      let[@inline] a b o = Rt.Ref.read_table_opt b o 4
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -265,12 +264,12 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 32 let set = Struct.set_vec3__8 end)
 
-      let x b s = Rt.Float.read_offset b s 0
-      let y b s = Rt.Float.read_offset b s 4
-      let z b s = Rt.Float.read_offset b s 8
-      let test1 b s = Rt.Double.read_offset b s 16
-      let test2 b s = Rt.UByte.read_offset b s 24
-      let test3 b s = Rt.Struct.read_offset b s 26
+      let[@inline] x b s = Rt.Float.read_offset b s 0
+      let[@inline] y b s = Rt.Float.read_offset b s 4
+      let[@inline] z b s = Rt.Float.read_offset b s 8
+      let[@inline] test1 b s = Rt.Double.read_offset b s 16
+      let[@inline] test2 b s = Rt.UByte.read_offset b s 24
+      let[@inline] test3 b s = Rt.Struct.read_offset b s 26
     end
 
     module TypeAliases = struct
@@ -278,18 +277,18 @@ module MyGame = struct
 
       module Vector = Rt.Ref.Vector
 
-      let i8 b o = Rt.Byte.(read_table_default b o 4 ~default:(of_default 0L))
-      let u8 b o = Rt.UByte.(read_table_default b o 6 ~default:(of_default 0L))
-      let i16 b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 0L))
-      let u16 b o = Rt.UShort.(read_table_default b o 10 ~default:(of_default 0L))
-      let i32 b o = Rt.Int.(read_table_default b o 12 ~default:(of_default 0L))
-      let u32 b o = Rt.UInt.(read_table_default b o 14 ~default:(of_default 0L))
-      let i64 b o = Rt.Long.(read_table_default b o 16 ~default:(of_default 0L))
-      let u64 b o = Rt.ULong.(read_table_default b o 18 ~default:(of_default 0L))
-      let f32 b o = Rt.Float.(read_table_default b o 20 ~default:(of_default 0.0))
-      let f64 b o = Rt.Double.(read_table_default b o 22 ~default:(of_default 0.0))
-      let v8 b o = Rt.Ref.read_table_opt b o 24
-      let vf64 b o = Rt.Ref.read_table_opt b o 26
+      let[@inline] i8 b o = Rt.Byte.(read_table_default b o 4 ~default:(of_default 0L))
+      let[@inline] u8 b o = Rt.UByte.(read_table_default b o 6 ~default:(of_default 0L))
+      let[@inline] i16 b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 0L))
+      let[@inline] u16 b o = Rt.UShort.(read_table_default b o 10 ~default:(of_default 0L))
+      let[@inline] i32 b o = Rt.Int.(read_table_default b o 12 ~default:(of_default 0L))
+      let[@inline] u32 b o = Rt.UInt.(read_table_default b o 14 ~default:(of_default 0L))
+      let[@inline] i64 b o = Rt.Long.(read_table_default b o 16 ~default:(of_default 0L))
+      let[@inline] u64 b o = Rt.ULong.(read_table_default b o 18 ~default:(of_default 0L))
+      let[@inline] f32 b o = Rt.Float.(read_table_default b o 20 ~default:(of_default 0.0))
+      let[@inline] f64 b o = Rt.Double.(read_table_default b o 22 ~default:(of_default 0.0))
+      let[@inline] v8 b o = Rt.Ref.read_table_opt b o 24
+      let[@inline] vf64 b o = Rt.Ref.read_table_opt b o 26
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -316,7 +315,7 @@ module MyGame = struct
 
       module Vector = Rt.Ref.Vector
 
-      let color b o = Rt.UByte.(read_table_default b o 4 ~default:(of_default 2L))
+      let[@inline] color b o = Rt.UByte.(read_table_default b o 4 ~default:(of_default 2L))
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -332,8 +331,8 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 4 let set = Struct.set_test__5 end)
 
-      let a b s = Rt.Short.read_offset b s 0
-      let b b s = Rt.Byte.read_offset b s 2
+      let[@inline] a b s = Rt.Short.read_offset b s 0
+      let[@inline] b b s = Rt.Byte.read_offset b s 2
     end
 
     module StructOfStructsOfStructs = struct
@@ -341,7 +340,7 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 20 let set = Struct.set_struct_of_structs_of_structs__7 end)
 
-      let a b s = Rt.Struct.read_offset b s 0
+      let[@inline] a b s = Rt.Struct.read_offset b s 0
     end
 
     module StructOfStructs = struct
@@ -349,9 +348,9 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 20 let set = Struct.set_struct_of_structs__6 end)
 
-      let a b s = Rt.Struct.read_offset b s 0
-      let b b s = Rt.Struct.read_offset b s 8
-      let c b s = Rt.Struct.read_offset b s 12
+      let[@inline] a b s = Rt.Struct.read_offset b s 0
+      let[@inline] b b s = Rt.Struct.read_offset b s 8
+      let[@inline] c b s = Rt.Struct.read_offset b s 12
     end
 
     module Stat = struct
@@ -359,9 +358,9 @@ module MyGame = struct
 
       module Vector = Rt.Ref.Vector
 
-      let id b o = Rt.Ref.read_table_opt b o 4
-      let val_ b o = Rt.Long.(read_table_default b o 6 ~default:(of_default 0L))
-      let count b o = Rt.UShort.(read_table_default b o 8 ~default:(of_default 0L))
+      let[@inline] id b o = Rt.Ref.read_table_opt b o 4
+      let[@inline] val_ b o = Rt.Long.(read_table_default b o 6 ~default:(of_default 0L))
+      let[@inline] count b o = Rt.UShort.(read_table_default b o 8 ~default:(of_default 0L))
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -379,7 +378,7 @@ module MyGame = struct
 
       module Vector = Rt.Ref.Vector
 
-      let id b o = Rt.ULong.(read_table_default b o 4 ~default:(of_default 0L))
+      let[@inline] id b o = Rt.ULong.(read_table_default b o 4 ~default:(of_default 0L))
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -397,71 +396,71 @@ module MyGame = struct
 
       let extension = Some "mon"
       let identifier = Some "MONS"
-      let has_identifier ?(size_prefixed = false) ?(off = 0) b = Rt.get_identifier b ~size_prefixed ~off = Option.get identifier
-      let root ?(size_prefixed = false) ?(off = 0) b = Rt.get_root b ~size_prefixed ~off
-      let finish_buf = Rt.Builder.finish ?identifier
+      let has_identifier ?(size_prefixed = false) ?(off = 0) p b = Rt.get_identifier p b ~size_prefixed ~off = Option.get identifier
+      let[@inline] root ?(size_prefixed = false) ?(off = 0) p b = Rt.get_root p b ~size_prefixed ~off
+      let finish_buf ?(size_prefixed = false) = Rt.Builder.finish ?identifier ~size_prefixed
 
-      let pos b o = Rt.Struct.read_table_opt b o 4
-      let mana b o = Rt.Short.(read_table_default b o 6 ~default:(of_default 150L))
-      let hp b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 100L))
-      let name b o = Rt.Ref.read_table b o 10
-      let inventory b o = Rt.Ref.read_table_opt b o 14
-      let color b o = Rt.UByte.(read_table_default b o 16 ~default:(of_default 8L))
-      let test_type b o = Rt.UType.(read_table_default b o 18 ~default:(of_default 0L))
-      let test ?none ?monster ?test_simple_table_with_enum ?my_game_example2_monster ~default b o = Union.read_table_any__10 b 20 (test_type b o) ?none ?monster ?test_simple_table_with_enum ?my_game_example2_monster ~default o
-      let test4 b o = Rt.Ref.read_table_opt b o 22
-      let testarrayofstring b o = Rt.Ref.read_table_opt b o 24
-      let testarrayoftables b o = Rt.Ref.read_table_opt b o 26
-      let enemy b o = Rt.Ref.read_table_opt b o 28
-      let testnestedflatbuffer b o = Rt.Ref.read_table_opt b o 30
-      let testempty b o = Rt.Ref.read_table_opt b o 32
-      let testbool b o = Rt.Bool.(read_table_default b o 34 ~default:(of_default false))
-      let testhashs32_fnv1 b o = Rt.Int.(read_table_default b o 36 ~default:(of_default 0L))
-      let testhashu32_fnv1 b o = Rt.UInt.(read_table_default b o 38 ~default:(of_default 0L))
-      let testhashs64_fnv1 b o = Rt.Long.(read_table_default b o 40 ~default:(of_default 0L))
-      let testhashu64_fnv1 b o = Rt.ULong.(read_table_default b o 42 ~default:(of_default 0L))
-      let testhashs32_fnv1_a b o = Rt.Int.(read_table_default b o 44 ~default:(of_default 0L))
-      let testhashu32_fnv1_a b o = Rt.UInt.(read_table_default b o 46 ~default:(of_default 0L))
-      let testhashs64_fnv1_a b o = Rt.Long.(read_table_default b o 48 ~default:(of_default 0L))
-      let testhashu64_fnv1_a b o = Rt.ULong.(read_table_default b o 50 ~default:(of_default 0L))
-      let testarrayofbools b o = Rt.Ref.read_table_opt b o 52
-      let testf b o = Rt.Float.(read_table_default b o 54 ~default:(of_default 3.14159))
-      let testf2 b o = Rt.Float.(read_table_default b o 56 ~default:(of_default 3.0))
-      let testf3 b o = Rt.Float.(read_table_default b o 58 ~default:(of_default 0.0))
-      let testarrayofstring2 b o = Rt.Ref.read_table_opt b o 60
-      let testarrayofsortedstruct b o = Rt.Ref.read_table_opt b o 62
-      let flex b o = Rt.Ref.read_table_opt b o 64
-      let test5 b o = Rt.Ref.read_table_opt b o 66
-      let vector_of_longs b o = Rt.Ref.read_table_opt b o 68
-      let vector_of_doubles b o = Rt.Ref.read_table_opt b o 70
-      let parent_namespace_test b o = Rt.Ref.read_table_opt b o 72
-      let vector_of_referrables b o = Rt.Ref.read_table_opt b o 74
-      let single_weak_reference b o = Rt.ULong.(read_table_default b o 76 ~default:(of_default 0L))
-      let vector_of_weak_references b o = Rt.Ref.read_table_opt b o 78
-      let vector_of_strong_referrables b o = Rt.Ref.read_table_opt b o 80
-      let co_owning_reference b o = Rt.ULong.(read_table_default b o 82 ~default:(of_default 0L))
-      let vector_of_co_owning_references b o = Rt.Ref.read_table_opt b o 84
-      let non_owning_reference b o = Rt.ULong.(read_table_default b o 86 ~default:(of_default 0L))
-      let vector_of_non_owning_references b o = Rt.Ref.read_table_opt b o 88
-      let any_unique_type b o = Rt.UType.(read_table_default b o 90 ~default:(of_default 0L))
-      let any_unique ?none ?m ?ts ?m2 ~default b o = Union.read_table_any_unique_aliases__12 b 92 (any_unique_type b o) ?none ?m ?ts ?m2 ~default o
-      let any_ambiguous_type b o = Rt.UType.(read_table_default b o 94 ~default:(of_default 0L))
-      let any_ambiguous ?none ?m1 ?m2 ?m3 ~default b o = Union.read_table_any_ambiguous_aliases__11 b 96 (any_ambiguous_type b o) ?none ?m1 ?m2 ?m3 ~default o
-      let vector_of_enums b o = Rt.Ref.read_table_opt b o 98
-      let signed_enum b o = Rt.Byte.(read_table_default b o 100 ~default:(of_default (-1L)))
-      let testrequirednestedflatbuffer b o = Rt.Ref.read_table_opt b o 102
-      let scalar_key_sorted_tables b o = Rt.Ref.read_table_opt b o 104
-      let native_inline b o = Rt.Struct.read_table_opt b o 106
-      let long_enum_non_enum_default b o = Rt.ULong.(read_table_default b o 108 ~default:(of_default 0L))
-      let long_enum_normal_default b o = Rt.ULong.(read_table_default b o 110 ~default:(of_default 2L))
-      let nan_default b o = Rt.Float.(read_table_default b o 112 ~default:(of_default nan))
-      let inf_default b o = Rt.Float.(read_table_default b o 114 ~default:(of_default infinity))
-      let positive_inf_default b o = Rt.Float.(read_table_default b o 116 ~default:(of_default infinity))
-      let infinity_default b o = Rt.Float.(read_table_default b o 118 ~default:(of_default infinity))
-      let positive_infinity_default b o = Rt.Float.(read_table_default b o 120 ~default:(of_default infinity))
-      let negative_inf_default b o = Rt.Float.(read_table_default b o 122 ~default:(of_default neg_infinity))
-      let negative_infinity_default b o = Rt.Float.(read_table_default b o 124 ~default:(of_default neg_infinity))
-      let double_inf_default b o = Rt.Double.(read_table_default b o 126 ~default:(of_default infinity))
+      let[@inline] pos b o = Rt.Struct.read_table_opt b o 4
+      let[@inline] mana b o = Rt.Short.(read_table_default b o 6 ~default:(of_default 150L))
+      let[@inline] hp b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 100L))
+      let[@inline] name b o = Rt.Ref.read_table b o 10
+      let[@inline] inventory b o = Rt.Ref.read_table_opt b o 14
+      let[@inline] color b o = Rt.UByte.(read_table_default b o 16 ~default:(of_default 8L))
+      let[@inline] test_type b o = Rt.UType.(read_table_default b o 18 ~default:(of_default 0L))
+      let[@inline] test ?none ?monster ?test_simple_table_with_enum ?my_game_example2_monster ~default b o = Union.read_table_any__10 b 20 (test_type b o) ?none ?monster ?test_simple_table_with_enum ?my_game_example2_monster ~default o
+      let[@inline] test4 b o = Rt.Ref.read_table_opt b o 22
+      let[@inline] testarrayofstring b o = Rt.Ref.read_table_opt b o 24
+      let[@inline] testarrayoftables b o = Rt.Ref.read_table_opt b o 26
+      let[@inline] enemy b o = Rt.Ref.read_table_opt b o 28
+      let[@inline] testnestedflatbuffer b o = Rt.Ref.read_table_opt b o 30
+      let[@inline] testempty b o = Rt.Ref.read_table_opt b o 32
+      let[@inline] testbool b o = Rt.Bool.(read_table_default b o 34 ~default:(of_default false))
+      let[@inline] testhashs32_fnv1 b o = Rt.Int.(read_table_default b o 36 ~default:(of_default 0L))
+      let[@inline] testhashu32_fnv1 b o = Rt.UInt.(read_table_default b o 38 ~default:(of_default 0L))
+      let[@inline] testhashs64_fnv1 b o = Rt.Long.(read_table_default b o 40 ~default:(of_default 0L))
+      let[@inline] testhashu64_fnv1 b o = Rt.ULong.(read_table_default b o 42 ~default:(of_default 0L))
+      let[@inline] testhashs32_fnv1_a b o = Rt.Int.(read_table_default b o 44 ~default:(of_default 0L))
+      let[@inline] testhashu32_fnv1_a b o = Rt.UInt.(read_table_default b o 46 ~default:(of_default 0L))
+      let[@inline] testhashs64_fnv1_a b o = Rt.Long.(read_table_default b o 48 ~default:(of_default 0L))
+      let[@inline] testhashu64_fnv1_a b o = Rt.ULong.(read_table_default b o 50 ~default:(of_default 0L))
+      let[@inline] testarrayofbools b o = Rt.Ref.read_table_opt b o 52
+      let[@inline] testf b o = Rt.Float.(read_table_default b o 54 ~default:(of_default 3.14159))
+      let[@inline] testf2 b o = Rt.Float.(read_table_default b o 56 ~default:(of_default 3.0))
+      let[@inline] testf3 b o = Rt.Float.(read_table_default b o 58 ~default:(of_default 0.0))
+      let[@inline] testarrayofstring2 b o = Rt.Ref.read_table_opt b o 60
+      let[@inline] testarrayofsortedstruct b o = Rt.Ref.read_table_opt b o 62
+      let[@inline] flex b o = Rt.Ref.read_table_opt b o 64
+      let[@inline] test5 b o = Rt.Ref.read_table_opt b o 66
+      let[@inline] vector_of_longs b o = Rt.Ref.read_table_opt b o 68
+      let[@inline] vector_of_doubles b o = Rt.Ref.read_table_opt b o 70
+      let[@inline] parent_namespace_test b o = Rt.Ref.read_table_opt b o 72
+      let[@inline] vector_of_referrables b o = Rt.Ref.read_table_opt b o 74
+      let[@inline] single_weak_reference b o = Rt.ULong.(read_table_default b o 76 ~default:(of_default 0L))
+      let[@inline] vector_of_weak_references b o = Rt.Ref.read_table_opt b o 78
+      let[@inline] vector_of_strong_referrables b o = Rt.Ref.read_table_opt b o 80
+      let[@inline] co_owning_reference b o = Rt.ULong.(read_table_default b o 82 ~default:(of_default 0L))
+      let[@inline] vector_of_co_owning_references b o = Rt.Ref.read_table_opt b o 84
+      let[@inline] non_owning_reference b o = Rt.ULong.(read_table_default b o 86 ~default:(of_default 0L))
+      let[@inline] vector_of_non_owning_references b o = Rt.Ref.read_table_opt b o 88
+      let[@inline] any_unique_type b o = Rt.UType.(read_table_default b o 90 ~default:(of_default 0L))
+      let[@inline] any_unique ?none ?m ?ts ?m2 ~default b o = Union.read_table_any_unique_aliases__12 b 92 (any_unique_type b o) ?none ?m ?ts ?m2 ~default o
+      let[@inline] any_ambiguous_type b o = Rt.UType.(read_table_default b o 94 ~default:(of_default 0L))
+      let[@inline] any_ambiguous ?none ?m1 ?m2 ?m3 ~default b o = Union.read_table_any_ambiguous_aliases__11 b 96 (any_ambiguous_type b o) ?none ?m1 ?m2 ?m3 ~default o
+      let[@inline] vector_of_enums b o = Rt.Ref.read_table_opt b o 98
+      let[@inline] signed_enum b o = Rt.Byte.(read_table_default b o 100 ~default:(of_default (-1L)))
+      let[@inline] testrequirednestedflatbuffer b o = Rt.Ref.read_table_opt b o 102
+      let[@inline] scalar_key_sorted_tables b o = Rt.Ref.read_table_opt b o 104
+      let[@inline] native_inline b o = Rt.Struct.read_table_opt b o 106
+      let[@inline] long_enum_non_enum_default b o = Rt.ULong.(read_table_default b o 108 ~default:(of_default 0L))
+      let[@inline] long_enum_normal_default b o = Rt.ULong.(read_table_default b o 110 ~default:(of_default 2L))
+      let[@inline] nan_default b o = Rt.Float.(read_table_default b o 112 ~default:(of_default nan))
+      let[@inline] inf_default b o = Rt.Float.(read_table_default b o 114 ~default:(of_default infinity))
+      let[@inline] positive_inf_default b o = Rt.Float.(read_table_default b o 116 ~default:(of_default infinity))
+      let[@inline] infinity_default b o = Rt.Float.(read_table_default b o 118 ~default:(of_default infinity))
+      let[@inline] positive_infinity_default b o = Rt.Float.(read_table_default b o 120 ~default:(of_default infinity))
+      let[@inline] negative_inf_default b o = Rt.Float.(read_table_default b o 122 ~default:(of_default neg_infinity))
+      let[@inline] negative_infinity_default b o = Rt.Float.(read_table_default b o 124 ~default:(of_default neg_infinity))
+      let[@inline] double_inf_default b o = Rt.Double.(read_table_default b o 126 ~default:(of_default infinity))
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -540,9 +539,8 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 8 let set = Struct.set_ability__4 end)
 
-      let id b s = Rt.UInt.read_offset b s 0
-      let distance b s = Rt.UInt.read_offset b s 4
+      let[@inline] id b s = Rt.UInt.read_offset b s 0
+      let[@inline] distance b s = Rt.UInt.read_offset b s 4
     end
   end (* Example *)
 end (* MyGame *)
-end

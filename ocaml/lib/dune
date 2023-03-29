@@ -1,11 +1,5 @@
 (library
  (public_name flatbuffers)
  (name flatbuffers)
- (modules_without_implementation primitives builder runtime)
  (preprocess (action (run %{bin:cppo} -I . -V OCAML:%{ocaml_version} %{input-file})))
- (preprocessor_deps primitives_bytes.ml
-                    primitives_string.ml
-                    primitives_bigstring.ml
-                    builder.incl.ml
-                    runtime.incl.ml)
  (libraries bigstringaf unix))

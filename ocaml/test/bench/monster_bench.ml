@@ -1,4 +1,4 @@
-open Generated.Monster.Make (Flatbuffers.BigstringRuntime)
+open Generated.Monster
 open MyGame.Sample
 
 let read_vec3 buf p =
@@ -7,17 +7,16 @@ let read_vec3 buf p =
   ignore (Vec3.z buf p)
 ;;
 
-let ignore2 _ _ = ()
-let read_string buf s = Rt.String.iter buf ignore2 s
+let read_string buf s = Rt.String.iter buf ignore s
 
 let read_weapon buf w =
   Weapon.name buf w |> Rt.Option.get |> read_string buf;
   Weapon.damage buf w |> ignore
 ;;
 
-let read_uint8_vec buf v = Rt.UByte.Vector.iter buf ignore2 v
-let read_weapon_vec buf v = Weapon.Vector.iter buf read_weapon v
-let read_vec3_vec buf v = Vec3.Vector.iter buf read_vec3 v
+let read_uint8_vec buf v = Rt.UByte.Vector.iter buf ignore v
+let read_weapon_vec buf v = Weapon.Vector.iter buf (read_weapon buf) v
+let read_vec3_vec buf v = Vec3.Vector.iter buf (read_vec3 buf) v
 
 let read_monster (buf, m) =
   Monster.pos buf m |> Rt.Option.get |> read_vec3 buf;
@@ -83,9 +82,9 @@ let () =
   Memtrace.trace_if_requested ();
   (* set up monster data and builder *)
   let b = Rt.Builder.create () in
-  let buf = write_monster b |> Monster.finish_buf b in
+  let buf = write_monster b |> Monster.finish_buf Flatbuffers.Primitives.Bigstring b in
   Printf.printf "Buffer size: %d\n" (Bigstringaf.length buf);
-  let (Rt.Root (buf, m)) = Monster.root buf in
+  let (Rt.Root (buf, m)) = Monster.root Flatbuffers.Primitives.Bigstring buf in
   (* benchmark read *)
   ignore (allocated_since_last ());
   let res = Benchmark.latencyN ~repeat read_iter [ "read", read_monster, (buf, m) ] in

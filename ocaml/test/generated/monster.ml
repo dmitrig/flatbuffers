@@ -6,8 +6,7 @@
 
 [@@@warning "-32"]
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) = struct
-module Rt = R
+module Rt = Flatbuffers.Runtime
 
 module Struct = struct
 
@@ -62,8 +61,8 @@ module MyGame = struct
 
       module Vector = Rt.Ref.Vector
 
-      let name b o = Rt.Ref.read_table_opt b o 4
-      let damage b o = Rt.Short.(read_table_default b o 6 ~default:(of_default 0L))
+      let[@inline] name b o = Rt.Ref.read_table_opt b o 4
+      let[@inline] damage b o = Rt.Short.(read_table_default b o 6 ~default:(of_default 0L))
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -80,9 +79,9 @@ module MyGame = struct
 
       module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 12 let set = Struct.set_vec3__0 end)
 
-      let x b s = Rt.Float.read_offset b s 0
-      let y b s = Rt.Float.read_offset b s 4
-      let z b s = Rt.Float.read_offset b s 8
+      let[@inline] x b s = Rt.Float.read_offset b s 0
+      let[@inline] y b s = Rt.Float.read_offset b s 4
+      let[@inline] z b s = Rt.Float.read_offset b s 8
     end
 
     module Monster = struct
@@ -92,19 +91,19 @@ module MyGame = struct
 
       let extension = None
       let identifier = None
-      let root ?(size_prefixed = false) ?(off = 0) b = Rt.get_root b ~size_prefixed ~off
-      let finish_buf = Rt.Builder.finish ?identifier
+      let[@inline] root ?(size_prefixed = false) ?(off = 0) p b = Rt.get_root p b ~size_prefixed ~off
+      let finish_buf ?(size_prefixed = false) = Rt.Builder.finish ?identifier ~size_prefixed
 
-      let pos b o = Rt.Struct.read_table_opt b o 4
-      let mana b o = Rt.Short.(read_table_default b o 6 ~default:(of_default 150L))
-      let hp b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 100L))
-      let name b o = Rt.Ref.read_table_opt b o 10
-      let inventory b o = Rt.Ref.read_table_opt b o 14
-      let color b o = Rt.Byte.(read_table_default b o 16 ~default:(of_default 2L))
-      let weapons b o = Rt.Ref.read_table_opt b o 18
-      let equipped_type b o = Rt.UType.(read_table_default b o 20 ~default:(of_default 0L))
-      let equipped ?none ?weapon ~default b o = Union.read_table_equipment__1 b 22 (equipped_type b o) ?none ?weapon ~default o
-      let path b o = Rt.Ref.read_table_opt b o 24
+      let[@inline] pos b o = Rt.Struct.read_table_opt b o 4
+      let[@inline] mana b o = Rt.Short.(read_table_default b o 6 ~default:(of_default 150L))
+      let[@inline] hp b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 100L))
+      let[@inline] name b o = Rt.Ref.read_table_opt b o 10
+      let[@inline] inventory b o = Rt.Ref.read_table_opt b o 14
+      let[@inline] color b o = Rt.Byte.(read_table_default b o 16 ~default:(of_default 2L))
+      let[@inline] weapons b o = Rt.Ref.read_table_opt b o 18
+      let[@inline] equipped_type b o = Rt.UType.(read_table_default b o 20 ~default:(of_default 0L))
+      let[@inline] equipped ?none ?weapon ~default b o = Union.read_table_equipment__1 b 22 (equipped_type b o) ?none ?weapon ~default o
+      let[@inline] path b o = Rt.Ref.read_table_opt b o 24
 
       module Builder = struct
         type t = Rt.Builder.t
@@ -124,4 +123,3 @@ module MyGame = struct
     end
   end (* Sample *)
 end (* MyGame *)
-end

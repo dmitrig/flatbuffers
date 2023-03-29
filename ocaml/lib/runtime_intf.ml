@@ -3,9 +3,6 @@
     Just defines scalars, buffer and builder types, and vectors of
     each scalar type. Most of the user-facing API is in generated code *)
 module type Intf = sig
-  (* argument *)
-  module T : Primitives.Intf_types
-
   (** Builder *)
   module Builder : sig
     type t
@@ -38,7 +35,7 @@ module type Intf = sig
 
     val length : 'b buf -> ('b, t) fb -> int
     val get : 'b buf -> ('b, t) fb -> int -> 'b elt
-    val iter : 'b buf -> ('b buf -> 'b elt -> unit) -> ('b, t) fb -> unit
+    val iter : 'b buf -> ('b elt -> unit) -> ('b, t) fb -> unit
     val to_list : 'b buf -> ('b, t) fb -> 'b elt list
     val to_array : 'b buf -> ('b, t) fb -> 'b elt array
     val to_seq : 'b buf -> ('b, t) fb -> 'b elt Seq.t
@@ -53,18 +50,18 @@ module type Intf = sig
 
   (** Scalars *)
 
-  module Bool : ScalarS with type t = T.bool
-  module Byte : ScalarS with type t = T.byte
-  module UByte : ScalarS with type t = T.ubyte
-  module UType : ScalarS with type t = T.ubyte
-  module Short : ScalarS with type t = T.short
-  module UShort : ScalarS with type t = T.ushort
-  module Int : ScalarS with type t = T.int
-  module UInt : ScalarS with type t = T.uint
-  module Long : ScalarS with type t = T.long
-  module ULong : ScalarS with type t = T.ulong
-  module Float : ScalarS with type t = T.float
-  module Double : ScalarS with type t = T.double
+  module Bool : ScalarS with type t = Primitives.T.bool
+  module Byte : ScalarS with type t = Primitives.T.byte
+  module UByte : ScalarS with type t = Primitives.T.ubyte
+  module UType : ScalarS with type t = Primitives.T.ubyte
+  module Short : ScalarS with type t = Primitives.T.short
+  module UShort : ScalarS with type t = Primitives.T.ushort
+  module Int : ScalarS with type t = Primitives.T.int
+  module UInt : ScalarS with type t = Primitives.T.uint
+  module Long : ScalarS with type t = Primitives.T.long
+  module ULong : ScalarS with type t = Primitives.T.ulong
+  module Float : ScalarS with type t = Primitives.T.float
+  module Double : ScalarS with type t = Primitives.T.double
 
   (** String *)
   module String : sig
@@ -93,11 +90,9 @@ end
 
 (** Full runtime lib interface, only for use by generated code *)
 module type Intf_impl = sig
-  (* argument *)
-  module T : Primitives.Intf_types
 
   (* builder with same scalar types *)
-  module Builder : Builder_intf.Intf with module T := T
+  module Builder = Builder
 
   (* Buffers and offsets are abstract to generated code. Non-scalar types are
       represented as offsets. Phantom param for safety in generated code *)
@@ -109,8 +104,8 @@ module type Intf_impl = sig
   type 'a wip = Builder.offset
   type 't root = Root : 'b buf * ('b, 't) fb -> 't root
 
-  val get_identifier : ?off:int -> ?size_prefixed:bool -> T.buf -> string
-  val get_root : ?off:int -> ?size_prefixed:bool -> T.buf -> 'a root
+  val get_identifier : ?off:int -> ?size_prefixed:bool -> 'b Primitives.t -> 'b -> string
+  val get_root : ?off:int -> ?size_prefixed:bool -> 'b Primitives.t -> 'b -> 'a root
 
   module type VectorS = sig
     type t
@@ -119,7 +114,7 @@ module type Intf_impl = sig
 
     val length : 'b buf -> ('b, t) fb -> int
     val get : 'b buf -> ('b, t) fb -> int -> 'b elt
-    val iter : 'b buf -> ('b buf -> 'b elt -> unit) -> ('b, t) fb -> unit
+    val iter : 'b buf -> ('b elt -> unit) -> ('b, t) fb -> unit
     val to_list : 'b buf -> ('b, t) fb -> 'b elt list
     val to_array : 'b buf -> ('b, t) fb -> 'b elt array
     val to_seq : 'b buf -> ('b, t) fb -> 'b elt Seq.t
@@ -144,18 +139,18 @@ module type Intf_impl = sig
     module Vector : VectorS with type 'b elt := t and type builder_elt := t
   end
 
-  module Bool : ScalarS with type default := bool and type t = T.bool
-  module Byte : ScalarS with type default := int64 and type t = T.byte
-  module UByte : ScalarS with type default := int64 and type t = T.ubyte
-  module UType : ScalarS with type default := int64 and type t = T.ubyte
-  module Short : ScalarS with type default := int64 and type t = T.short
-  module UShort : ScalarS with type default := int64 and type t = T.ushort
-  module Int : ScalarS with type default := int64 and type t = T.int
-  module UInt : ScalarS with type default := int64 and type t = T.uint
-  module Long : ScalarS with type default := int64 and type t = T.long
-  module ULong : ScalarS with type default := int64 and type t = T.ulong
-  module Float : ScalarS with type default := float and type t = T.float
-  module Double : ScalarS with type default := float and type t = T.double
+  module Bool : ScalarS with type default := bool and type t = Primitives.T.bool
+  module Byte : ScalarS with type default := int64 and type t = Primitives.T.byte
+  module UByte : ScalarS with type default := int64 and type t = Primitives.T.ubyte
+  module UType : ScalarS with type default := int64 and type t = Primitives.T.ubyte
+  module Short : ScalarS with type default := int64 and type t = Primitives.T.short
+  module UShort : ScalarS with type default := int64 and type t = Primitives.T.ushort
+  module Int : ScalarS with type default := int64 and type t = Primitives.T.int
+  module UInt : ScalarS with type default := int64 and type t = Primitives.T.uint
+  module Long : ScalarS with type default := int64 and type t = Primitives.T.long
+  module ULong : ScalarS with type default := int64 and type t = Primitives.T.ulong
+  module Float : ScalarS with type default := float and type t = Primitives.T.float
+  module Double : ScalarS with type default := float and type t = Primitives.T.double
 
   module Struct : sig
     val read_offset : 'b buf -> offset -> int -> offset
@@ -184,7 +179,7 @@ module type Intf_impl = sig
     val read_table : 'b buf -> offset -> int -> offset
     val read_table_opt : 'b buf -> offset -> int -> offset
     val push_slot : int -> Builder.offset -> Builder.t -> Builder.t
-    val push_union : int -> int -> T.ubyte -> Builder.offset -> Builder.t -> Builder.t
+    val push_union : int -> int -> UByte.t -> Builder.offset -> Builder.t -> Builder.t
 
     module Vector :
       VectorS with type 'b elt := offset and type builder_elt := Builder.offset

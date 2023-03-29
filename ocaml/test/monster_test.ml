@@ -2,8 +2,11 @@ let check_monsterdata ?(size_prefixed = false) buf =
   let open Fixtures.Monster_test in
   let open MyGame.Example in
   let open Rt in
-  Alcotest.(check bool) "has_ident" true (Monster.has_identifier ~size_prefixed buf);
-  let (Root (buf, m)) = Monster.root ~size_prefixed buf in
+  Alcotest.(check bool)
+    "has_ident"
+    true
+    (Monster.has_identifier Flatbuffers.Primitives.Bytes ~size_prefixed buf);
+  let (Root (buf, m)) = Monster.root ~size_prefixed Flatbuffers.Primitives.Bytes buf in
   Alcotest.(check int) "hp" 80 (Monster.hp buf m);
   Alcotest.(check int) "mana" 150 (Monster.mana buf m);
   Alcotest.(check string) "name" "MyMonster" (Monster.name buf m |> String.to_string buf);
@@ -51,7 +54,7 @@ let check_monsterdata ?(size_prefixed = false) buf =
     "test4 sum"
     100
     (Test.Vector.to_seq buf test4
-    |> Seq.fold_left (fun a t -> a + Test.a buf t + Test.b buf t) 0);
+     |> Seq.fold_left (fun a t -> a + Test.a buf t + Test.b buf t) 0);
   let aos = Monster.testarrayofstring buf m in
   Alcotest.(check bool) "testarrayofstring is some" true (Option.is_some aos);
   Alcotest.(check (list string))
@@ -76,7 +79,10 @@ let check_generated ?(size_prefixed = false) () =
   let open Fixtures.Monster_test in
   let open MyGame.Example in
   let b = Rt.Builder.create () in
-  let buf = Fixtures.create_example_monster b |> Monster.finish_buf ~size_prefixed b in
+  let buf =
+    Fixtures.create_example_monster b
+    |> Monster.finish_buf Flatbuffers.Primitives.Bytes ~size_prefixed b
+  in
   check_monsterdata ~size_prefixed buf
 ;;
 
@@ -84,7 +90,10 @@ let check_generated_matches ?(size_prefixed = false) path () =
   let open Fixtures.Monster_test in
   let open MyGame.Example in
   let b = Rt.Builder.create () in
-  let buf = Fixtures.create_example_monster b |> Monster.finish_buf ~size_prefixed b in
+  let buf =
+    Fixtures.create_example_monster b
+    |> Monster.finish_buf Flatbuffers.Primitives.Bytes ~size_prefixed b
+  in
   let buf' = Fixtures.bytes_of_file path in
   Fixtures.check_bytes_chunked buf' buf
 ;;
@@ -94,7 +103,9 @@ let check_generated_reset () =
   let open MyGame.Example in
   let b = Rt.Builder.create () in
   (* build first example *)
-  let buf = Fixtures.create_example_monster b |> Monster.finish_buf b in
+  let buf =
+    Fixtures.create_example_monster b |> Monster.finish_buf Flatbuffers.Primitives.Bytes b
+  in
   Rt.Builder.reset b;
   (* write another monster *)
   Fixtures.create_monster
@@ -112,7 +123,7 @@ let check_generated_reset () =
   Rt.Builder.reset b;
   (* write second example *)
   Fixtures.create_example_monster b
-  |> Monster.finish_buf b
+  |> Monster.finish_buf Flatbuffers.Primitives.Bytes b
   |> Fixtures.check_bytes_chunked buf
 ;;
 
@@ -120,7 +131,10 @@ let check_defaults_not_written () =
   let open Fixtures.Monster_test in
   let open MyGame.Example in
   let b = Rt.Builder.create () in
-  let buf = Monster.Builder.(start b |> finish) |> Monster.finish_buf b in
+  let buf =
+    Monster.Builder.(start b |> finish)
+    |> Monster.finish_buf Flatbuffers.Primitives.Bytes b
+  in
   let buf' =
     Monster.Builder.(
       start b
@@ -133,7 +147,7 @@ let check_defaults_not_written () =
       |> add_inf_default infinity
       |> add_nan_default nan
       |> finish)
-    |> Monster.finish_buf b
+    |> Monster.finish_buf Flatbuffers.Primitives.Bytes b
   in
   Alcotest.(check bytes) "buffers are identical" buf buf'
 ;;
@@ -171,7 +185,9 @@ let check_default_layout ?(size_prefixed = false) () =
   (* check against builder output *)
   let b = Rt.Builder.create () in
   let buf =
-    MyGame.Example.Monster.(Builder.(start b |> finish) |> finish_buf ~size_prefixed b)
+    MyGame.Example.Monster.(
+      Builder.(start b |> finish)
+      |> finish_buf Flatbuffers.Primitives.Bytes ~size_prefixed b)
   in
   Alcotest.(check int) "buffer size" (Bytes.length layout) (Bytes.length buf);
   Alcotest.(check bytes) "buffer layout" layout buf
@@ -181,8 +197,11 @@ let check_monster_extra_floats () =
   let open Fixtures.Monster_extra in
   let open MyGame in
   let b = Rt.Builder.create () in
-  let buf = MonsterExtra.(Builder.(start b |> finish) |> finish_buf b) in
-  let (Rt.Root (buf, mon)) = MonsterExtra.root buf in
+  let buf =
+    MonsterExtra.(
+      Builder.(start b |> finish) |> finish_buf Flatbuffers.Primitives.Bytes b)
+  in
+  let (Rt.Root (buf, mon)) = MonsterExtra.root Flatbuffers.Primitives.Bytes buf in
   Alcotest.(check bool) "is_nan d0" true (Float.is_nan (MonsterExtra.d0 buf mon));
   Alcotest.(check bool) "is_nan d1" true (Float.is_nan (MonsterExtra.d1 buf mon));
   Alcotest.(check (float 0.)) "d2" Float.infinity (MonsterExtra.d2 buf mon);

@@ -6,8 +6,7 @@
 
 [@@@warning "-32"]
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) = struct
-module Rt = R
+module Rt = Flatbuffers.Runtime
 
 module MyGame = struct
   module MonsterExtra = struct
@@ -17,20 +16,20 @@ module MyGame = struct
 
     let extension = Some "mon"
     let identifier = Some "MONE"
-    let has_identifier ?(size_prefixed = false) ?(off = 0) b = Rt.get_identifier b ~size_prefixed ~off = Option.get identifier
-    let root ?(size_prefixed = false) ?(off = 0) b = Rt.get_root b ~size_prefixed ~off
-    let finish_buf = Rt.Builder.finish ?identifier
+    let has_identifier ?(size_prefixed = false) ?(off = 0) p b = Rt.get_identifier p b ~size_prefixed ~off = Option.get identifier
+    let[@inline] root ?(size_prefixed = false) ?(off = 0) p b = Rt.get_root p b ~size_prefixed ~off
+    let finish_buf ?(size_prefixed = false) = Rt.Builder.finish ?identifier ~size_prefixed
 
-    let d0 b o = Rt.Double.(read_table_default b o 4 ~default:(of_default nan))
-    let d1 b o = Rt.Double.(read_table_default b o 6 ~default:(of_default nan))
-    let d2 b o = Rt.Double.(read_table_default b o 8 ~default:(of_default infinity))
-    let d3 b o = Rt.Double.(read_table_default b o 10 ~default:(of_default neg_infinity))
-    let f0 b o = Rt.Float.(read_table_default b o 12 ~default:(of_default nan))
-    let f1 b o = Rt.Float.(read_table_default b o 14 ~default:(of_default nan))
-    let f2 b o = Rt.Float.(read_table_default b o 16 ~default:(of_default infinity))
-    let f3 b o = Rt.Float.(read_table_default b o 18 ~default:(of_default neg_infinity))
-    let dvec b o = Rt.Ref.read_table_opt b o 20
-    let fvec b o = Rt.Ref.read_table_opt b o 22
+    let[@inline] d0 b o = Rt.Double.(read_table_default b o 4 ~default:(of_default nan))
+    let[@inline] d1 b o = Rt.Double.(read_table_default b o 6 ~default:(of_default nan))
+    let[@inline] d2 b o = Rt.Double.(read_table_default b o 8 ~default:(of_default infinity))
+    let[@inline] d3 b o = Rt.Double.(read_table_default b o 10 ~default:(of_default neg_infinity))
+    let[@inline] f0 b o = Rt.Float.(read_table_default b o 12 ~default:(of_default nan))
+    let[@inline] f1 b o = Rt.Float.(read_table_default b o 14 ~default:(of_default nan))
+    let[@inline] f2 b o = Rt.Float.(read_table_default b o 16 ~default:(of_default infinity))
+    let[@inline] f3 b o = Rt.Float.(read_table_default b o 18 ~default:(of_default neg_infinity))
+    let[@inline] dvec b o = Rt.Ref.read_table_opt b o 20
+    let[@inline] fvec b o = Rt.Ref.read_table_opt b o 22
 
     module Builder = struct
       type t = Rt.Builder.t
@@ -50,4 +49,3 @@ module MyGame = struct
     end
   end
 end (* MyGame *)
-end

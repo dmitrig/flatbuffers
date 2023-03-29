@@ -6,8 +6,7 @@
 
 [@@@warning "-32"]
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) = struct
-module Rt = R
+module Rt = Flatbuffers.Runtime
 
 module Struct = struct
 
@@ -51,13 +50,13 @@ module BenchmarksFlatbuffers = struct
 
     let extension = None
     let identifier = None
-    let root ?(size_prefixed = false) ?(off = 0) b = Rt.get_root b ~size_prefixed ~off
-    let finish_buf = Rt.Builder.finish ?identifier
+    let[@inline] root ?(size_prefixed = false) ?(off = 0) p b = Rt.get_root p b ~size_prefixed ~off
+    let finish_buf ?(size_prefixed = false) = Rt.Builder.finish ?identifier ~size_prefixed
 
-    let list b o = Rt.Ref.read_table_opt b o 4
-    let initialized b o = Rt.Bool.(read_table_default b o 6 ~default:(of_default false))
-    let fruit b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 0L))
-    let location b o = Rt.Ref.read_table_opt b o 10
+    let[@inline] list b o = Rt.Ref.read_table_opt b o 4
+    let[@inline] initialized b o = Rt.Bool.(read_table_default b o 6 ~default:(of_default false))
+    let[@inline] fruit b o = Rt.Short.(read_table_default b o 8 ~default:(of_default 0L))
+    let[@inline] location b o = Rt.Ref.read_table_opt b o 10
 
     module Builder = struct
       type t = Rt.Builder.t
@@ -76,10 +75,10 @@ module BenchmarksFlatbuffers = struct
 
     module Vector = Rt.Ref.Vector
 
-    let sibling b o = Rt.Struct.read_table_opt b o 4
-    let name b o = Rt.Ref.read_table_opt b o 6
-    let rating b o = Rt.Double.(read_table_default b o 8 ~default:(of_default 0.0))
-    let postfix b o = Rt.UByte.(read_table_default b o 10 ~default:(of_default 0L))
+    let[@inline] sibling b o = Rt.Struct.read_table_opt b o 4
+    let[@inline] name b o = Rt.Ref.read_table_opt b o 6
+    let[@inline] rating b o = Rt.Double.(read_table_default b o 8 ~default:(of_default 0.0))
+    let[@inline] postfix b o = Rt.UByte.(read_table_default b o 10 ~default:(of_default 0L))
 
     module Builder = struct
       type t = Rt.Builder.t
@@ -98,10 +97,10 @@ module BenchmarksFlatbuffers = struct
 
     module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 16 let set = Struct.set_foo__2 end)
 
-    let id b s = Rt.ULong.read_offset b s 0
-    let count b s = Rt.Short.read_offset b s 8
-    let prefix b s = Rt.Byte.read_offset b s 10
-    let length b s = Rt.UInt.read_offset b s 12
+    let[@inline] id b s = Rt.ULong.read_offset b s 0
+    let[@inline] count b s = Rt.Short.read_offset b s 8
+    let[@inline] prefix b s = Rt.Byte.read_offset b s 10
+    let[@inline] length b s = Rt.UInt.read_offset b s 12
   end
 
   module Bar = struct
@@ -109,10 +108,9 @@ module BenchmarksFlatbuffers = struct
 
     module Vector = Rt.Struct.Vector (struct type builder_elt = t let size = 32 let set = Struct.set_bar__3 end)
 
-    let parent b s = Rt.Struct.read_offset b s 0
-    let time b s = Rt.Int.read_offset b s 16
-    let ratio b s = Rt.Float.read_offset b s 20
-    let size b s = Rt.UShort.read_offset b s 24
+    let[@inline] parent b s = Rt.Struct.read_offset b s 0
+    let[@inline] time b s = Rt.Int.read_offset b s 16
+    let[@inline] ratio b s = Rt.Float.read_offset b s 20
+    let[@inline] size b s = Rt.UShort.read_offset b s 24
   end
 end (* BenchmarksFlatbuffers *)
-end

@@ -4,8 +4,7 @@
     flatc version: 23.3.3
 *)
 
-module Make (R : Flatbuffers.Runtime.Intf_impl) : sig
-module Rt : Flatbuffers.Runtime.Intf with module T := R.T
+module Rt : Flatbuffers.Runtime.Intf
 
 module rec BenchmarksFlatbuffers : sig
   (* Enum benchmarks_flatbuffers.Enum (//bench.fbs) *)
@@ -28,8 +27,8 @@ module rec BenchmarksFlatbuffers : sig
 
     val extension : string option
     val identifier : string option
-    val root : ?size_prefixed:bool -> ?off:int -> R.T.buf -> t Rt.root
-    val finish_buf : ?size_prefixed:bool -> Rt.Builder.t -> t Rt.wip -> R.T.buf
+    val root : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> t Rt.root
+    val finish_buf : ?size_prefixed:bool -> 'a Flatbuffers.Primitives.t -> Rt.Builder.t -> t Rt.wip -> 'a
 
     val list : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, FooBar.Vector.t) Rt.fbopt
     val initialized : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
@@ -95,4 +94,3 @@ module rec BenchmarksFlatbuffers : sig
     val size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.UShort.t
   end
 end (* BenchmarksFlatbuffers *)
-end

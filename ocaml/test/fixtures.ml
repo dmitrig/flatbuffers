@@ -1,5 +1,5 @@
-module Monster_test = Generated.Monster_test.Make (Flatbuffers.BytesRuntime)
-module Monster_extra = Generated.Monster_extra.Make (Flatbuffers.BytesRuntime)
+module Monster_test = Generated.Monster_test
+module Monster_extra = Generated.Monster_extra
 
 let create_monster ~pos ~hp ~name ~inv ~name2 ~test4 ~strings ~longs ~doubles b =
   let open Monster_test in
