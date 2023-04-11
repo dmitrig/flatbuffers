@@ -13,7 +13,8 @@ Includes an ocaml version of the cpp encode/decode benchmark (see `fb_bench.cpp`
 
     dune exec --profile=release --display=quiet test/bench/fb_bench.exe
 
-Note that flambda (with -O3) is currently required for good performance.
+Read performance appears to be close to Java (openjdk 11) using the baseline
+compiler and close to 2x faster with flambda.
 
 ## Usage
 Run flatc with the `--ocaml` flag.
@@ -28,3 +29,4 @@ additional flags are currently supported.
 * lookup by key in sorted vectors
 * generate object API
 * generate verification API
+* 32-bit / big-endian arch support?
