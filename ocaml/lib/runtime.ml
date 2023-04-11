@@ -48,7 +48,7 @@ type 'b vt =
   ; iter_vec : 'a. 'a tag -> 'b -> ('a -> unit) -> int -> unit
   }
 
-type 'b buf = Buf : 'a Primitives.t * 'a vt * 'a -> 'b buf
+type 'b buf = Buf : 'a vt * 'a -> 'b buf
 type ('b, 't) fb = offset
 type ('b, 't) fbopt = offset
 type 'a wip = Builder.offset
@@ -126,10 +126,10 @@ let[@inline] vt_of (type a) (p : a Primitives.t) : a vt =
 #define SCALAR(name_,ty_,default_,size_) \
 module name_ = struct \
   type t = Primitives.T.ty_ \
-  let[@inline] read_offset (Buf (_, vt, b)) i off = vt.CONCAT(read_offset_, ty_) b i off \
-  let[@inline] read_table_default (Buf (_, vt, b)) i n ~default = vt.CONCAT(read_table_default_, ty_) b i n ~default \
-  let[@inline] read_table (Buf (_, vt, b)) i n = vt.CONCAT(read_table_, ty_) b i n \
-  let[@inline] read_table_opt (Buf (_, vt, b)) i n = vt.CONCAT(read_table_opt_, ty_) b i n \
+  let[@inline] read_offset (Buf (vt, b)) i off = vt.CONCAT(read_offset_, ty_) b i off \
+  let[@inline] read_table_default (Buf (vt, b)) i n ~default = vt.CONCAT(read_table_default_, ty_) b i n ~default \
+  let[@inline] read_table (Buf (vt, b)) i n = vt.CONCAT(read_table_, ty_) b i n \
+  let[@inline] read_table_opt (Buf (vt, b)) i n = vt.CONCAT(read_table_opt_, ty_) b i n \
   let size = size_ \
   let[@inline] set b i x = Builder.(CONCAT(set_, ty_)) b i x \
   let[@inline] push_slot f x b = \
@@ -146,12 +146,12 @@ module name_ = struct \
   let[@inline] of_default x = Primitives.(CONCAT(of_default_, ty_)) x \
   module Vector = struct \
     type t \
-    let[@inline] length (Buf (_, vt, b)) i = vt.length_vec b i \
-    let[@inline] get (Buf (_, vt, b)) i j = vt.CONCAT(get_vec_,ty_) b i j \
-    let[@inline] to_list (Buf (_, vt, b)) i = vt.CONCAT(to_list_vec_,ty_) b i \
-    let[@inline] to_array (Buf (_, vt, b)) i = vt.CONCAT(to_array_vec_,ty_) b i \
-    let[@inline] to_seq (Buf (_, vt, b)) i = vt.CONCAT(to_seq_vec_,ty_) b i \
-    let[@inline] iter (Buf (_, vt, b)) f i = vt.CONCAT(iter_vec_,ty_) b f i \
+    let[@inline] length (Buf (vt, b)) i = vt.length_vec b i \
+    let[@inline] get (Buf (vt, b)) i j = vt.CONCAT(get_vec_,ty_) b i j \
+    let[@inline] to_list (Buf (vt, b)) i = vt.CONCAT(to_list_vec_,ty_) b i \
+    let[@inline] to_array (Buf (vt, b)) i = vt.CONCAT(to_array_vec_,ty_) b i \
+    let[@inline] to_seq (Buf (vt, b)) i = vt.CONCAT(to_seq_vec_,ty_) b i \
+    let[@inline] iter (Buf (vt, b)) f i = vt.CONCAT(iter_vec_,ty_) b f i \
     let[@inline] create b a = \
       let len = Array.length a in \
       Builder.start_vector b ~n_elts:(Array.length a) ~elt_size:size_; \
@@ -179,8 +179,8 @@ module UType = UByte
 
 module Struct = struct
   let[@inline] read_offset _ i off = i + off
-  let[@inline] read_table (Buf (_, vt, b)) i n = vt.read_table_struct b i n
-  let[@inline] read_table_opt (Buf (_, vt, b)) i n = vt.read_table_opt_struct b i n
+  let[@inline] read_table (Buf (vt, b)) i n = vt.read_table_struct b i n
+  let[@inline] read_table_opt (Buf (vt, b)) i n = vt.read_table_opt_struct b i n
 
   (* uses generated set function *)
   let[@inline] push_slot set size align f s b =
@@ -206,12 +206,12 @@ module Struct = struct
      *)
     type t
     let tag = TStruct { sz = T.size; align = 0 }
-    let[@inline] length (Buf (_, vt, b)) i = vt.length_vec b i
-    let[@inline] get (Buf (_, vt, b)) i j = vt.get_vec tag b i j
-    let[@inline] to_list (Buf (_, vt, b)) i = vt.to_list_vec tag b i
-    let[@inline] to_array (Buf (_, vt, b)) i = vt.to_array_vec tag b i
-    let[@inline] to_seq (Buf (_, vt, b)) i = vt.to_seq_vec tag b i
-    let[@inline] iter (Buf (_, vt, b)) f i = vt.iter_vec tag b f i
+    let[@inline] length (Buf (vt, b)) i = vt.length_vec b i
+    let[@inline] get (Buf (vt, b)) i j = vt.get_vec tag b i j
+    let[@inline] to_list (Buf (vt, b)) i = vt.to_list_vec tag b i
+    let[@inline] to_array (Buf (vt, b)) i = vt.to_array_vec tag b i
+    let[@inline] to_seq (Buf (vt, b)) i = vt.to_seq_vec tag b i
+    let[@inline] iter (Buf (vt, b)) f i = vt.iter_vec tag b f i
     let[@inline] create b a =
       let len = Array.length a in
       Builder.start_vector b ~n_elts:(Array.length a) ~elt_size:T.size;
@@ -225,8 +225,8 @@ module Struct = struct
 end
 
 module Ref = struct
-  let[@inline] read_table (Buf (_, vt, b)) i n = vt.read_table_ref b i n
-  let[@inline] read_table_opt (Buf (_, vt, b)) i n = vt.read_table_opt_ref b i n
+  let[@inline] read_table (Buf (vt, b)) i n = vt.read_table_ref b i n
+  let[@inline] read_table_opt (Buf (vt, b)) i n = vt.read_table_opt_ref b i n
 
   let size = 4
 
@@ -249,12 +249,12 @@ module Ref = struct
 
   module Vector = struct
     type t
-    let[@inline] length (Buf (_, vt, b)) i = vt.length_vec b i
-    let[@inline] get (Buf (_, vt, b)) i j = vt.get_vec_ref b i j
-    let[@inline] to_list (Buf (_, vt, b)) i = vt.to_list_vec_ref b i
-    let[@inline] to_array (Buf (_, vt, b)) i = vt.to_array_vec_ref b i
-    let[@inline] to_seq (Buf (_, vt, b)) i = vt.to_seq_vec_ref b i
-    let[@inline] iter (Buf (_, vt, b)) f i = vt.iter_vec_ref b f i
+    let[@inline] length (Buf (vt, b)) i = vt.length_vec b i
+    let[@inline] get (Buf (vt, b)) i j = vt.get_vec_ref b i j
+    let[@inline] to_list (Buf (vt, b)) i = vt.to_list_vec_ref b i
+    let[@inline] to_array (Buf (vt, b)) i = vt.to_array_vec_ref b i
+    let[@inline] to_seq (Buf (vt, b)) i = vt.to_seq_vec_ref b i
+    let[@inline] iter (Buf (vt, b)) f i = vt.iter_vec_ref b f i
     let[@inline] create b a =
       let len = Array.length a in
       Builder.start_vector b ~n_elts:(Array.length a) ~elt_size:size;
@@ -269,7 +269,7 @@ end
 module String = struct
   include UByte.Vector
 
-  let[@inline] to_string (Buf (_, vt, b)) i = vt.get_string b i
+  let[@inline] to_string (Buf (vt, b)) i = vt.get_string b i
 
   let[@inline] create b s =
     (* ensure null terminator; there may be more padding inserted *)
@@ -295,7 +295,7 @@ end
 
 let[@inline] get_root ?(off = 0) ?(size_prefixed = false) (t: 'b Primitives.t) (b: 'b) =
   let start = off + if size_prefixed then UInt.size else 0 in
-  let buf = Buf (t, vt_of t, b) in
+  let buf = Buf (vt_of t, b) in
   Root (buf, get_val TRef t b start)
 ;;
 
