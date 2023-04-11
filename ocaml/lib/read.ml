@@ -19,13 +19,12 @@ let[@inline] get_val (type a b) (t : a tag) (prim : b Primitives.t) (b : b) (i :
 (* get offset of a table via vtable *)
 let[@inline] get_indirect p b i voff =
   let vi = i - Primitives.get_soffset p b i in
-  (* TODO: just a uint16, not an offset *)
   let vsz = Primitives.get_voffset p b vi in
-  if voff >= vsz
-  then -1
-  else (
+  if voff < vsz
+  then (
     let foff = Primitives.get_voffset p b (vi + voff) in
-    if foff == 0 then -1 else i + foff)
+    if foff <> 0 then i + foff else -1)
+  else -1
 ;;
 
 (* generic *)
