@@ -19,7 +19,8 @@ open Read
   ; VT_VEC_SIGS(name_,ty_)
 
 type 'b vt =
-  { length_vec : 'b -> int -> int
+  { length_vec : 'b -> offset -> int
+  ; get_string : 'b -> offset -> string
   (* scalar *)
   ; VT_SCALAR_SIGS(bool, Primitives.T.bool)
   ; VT_SCALAR_SIGS(byte, Primitives.T.byte)
@@ -83,6 +84,7 @@ end
 
 #define VT(prim_) \
   { length_vec = (fun b i -> length_vec prim_ b i) \
+  ; get_string = (fun b i -> get_string prim_ b i) \
   ; VT_SCALAR_FNS(bool, Primitives.TBool, prim_) \
   ; VT_SCALAR_FNS(byte, Primitives.TByte, prim_) \
   ; VT_SCALAR_FNS(ubyte, Primitives.TUByte, prim_) \
@@ -267,11 +269,7 @@ end
 module String = struct
   include UByte.Vector
 
-  let[@inline] to_string b i =
-    let len = length b i in
-    let (Buf (t, _, b)) = b in
-    Primitives.get_string t b ~off:(i + 4) ~len
-  ;;
+  let[@inline] to_string (Buf (_, vt, b)) i = vt.get_string b i
 
   let[@inline] create b s =
     (* ensure null terminator; there may be more padding inserted *)

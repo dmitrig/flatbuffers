@@ -108,3 +108,8 @@ let[@inline] iter_vec t p b f i =
     f (unsafe_get_vec t p b i j)
   done
 ;;
+
+let[@inline] get_string (type b) (prim : b Primitives.t) (b : b) (i : offset) : string =
+  let len = length_vec prim b i in
+  Primitives.get_string prim b ~off:(i + 4) ~len
+;;
