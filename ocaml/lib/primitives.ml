@@ -48,8 +48,8 @@ let[@inline] get_uoffset (type b) (prim : b t) (b : b) i =
 
 let[@inline] get_voffset (type b) (prim : b t) (b : b) i =
   match prim with
-  | Bytes -> Bytes.get_int16_le b i
-  | String -> String.get_int16_le b i
+  | Bytes -> Bytes.get_uint16_le b i
+  | String -> String.get_uint16_le b i
   | Bigstring -> Bigstringaf.get_int16_le b i
 ;;
 
