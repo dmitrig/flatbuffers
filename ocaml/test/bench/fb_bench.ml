@@ -35,9 +35,8 @@ let encode b =
     |> finish)
 ;;
 
-let use buf =
+let use buf fbc =
   let sum = ref 0 in
-  let (Rt.Root (buf, fbc)) = FooBarContainer.root Flatbuffers.Primitives.String buf in
   sum := !sum + (FooBarContainer.initialized buf fbc |> Bool.to_int);
   sum := !sum + (FooBarContainer.location buf fbc |> Rt.Option.get |> Rt.String.length buf);
   sum := !sum + (FooBarContainer.fruit buf fbc :> int);
@@ -88,10 +87,13 @@ let () =
   let buf = encode b |> FooBarContainer.finish_buf Flatbuffers.Primitives.String b in
   Printf.printf "Buffer size: %d\n" (String.length buf);
   (* check sum *)
-  assert (use buf = 218812692406581874);
+  let (Rt.Root (buf, fbc)) = FooBarContainer.root Flatbuffers.Primitives.String buf in
+  assert (use buf fbc = 218812692406581874);
   (* benchmark read *)
   ignore (allocated_since_last ());
-  let res = Benchmark.latencyN ~repeat read_iter [ "read", use, buf ] in
+  let res =
+    Benchmark.latencyN ~repeat read_iter [ "read", (fun () -> use buf fbc), () ]
+  in
   Benchmark.tabulate res;
   print_allocated ~repeat read_iter;
   (* benchmark write *)
