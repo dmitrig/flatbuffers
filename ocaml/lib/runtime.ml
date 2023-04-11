@@ -2,11 +2,7 @@ module type Intf = Runtime_intf.Intf
 
 module Builder = Builder
 
-type offset = int
-type _ tag =
-  | TScalar : 'a Primitives.ty -> 'a tag
-  | TRef : offset tag
-  | TStruct : { sz: int; align: int } -> offset tag
+open Read
 
 #define VT_VEC_SIGS(name_,ty_) \
     CONCAT(get_vec_,name_) : 'b -> offset -> int -> ty_ \
@@ -71,109 +67,6 @@ module type VectorS = sig
   val create : Builder.t -> builder_elt array -> t wip
 end
 
-let[@inline] get_val (type a b) (t: a tag) (prim : b Primitives.t) (b: b) (i:int) : a =
-  match t with
-  | TScalar t' -> Primitives.get_scalar t' prim b i
-  | TRef -> i + Primitives.get_uoffset prim b i
-  | TStruct _ -> i
-
-(* get offset of a table via vtable *)
-let[@inline] get_indirect p b i voff =
-  let vi = i - Primitives.get_soffset p b i in
-  (* TODO: just a uint16, not an offset *)
-  let vsz = Primitives.get_voffset p b vi in
-  if voff >= vsz
-  then -1
-  else (
-    let foff = Primitives.get_voffset p b (vi + voff) in
-    if foff == 0 then -1 else i + foff)
-;;
-
-(* generic *)
-let[@inline] read_table t p b i n =
-  let i' = get_indirect p b i n in
-  if i' < 0 then invalid_arg "required field not set" else get_val t p b i'
-;;
-
-(* scalars *)
-let[@inline] read_table_default t p b i n ~default =
-  let i' = get_indirect p b i n in
-  if i' < 0 then default else Primitives.get_scalar t p b i'
-;;
-
-let[@inline] read_table_opt t p b i n =
-  let i' = get_indirect p b i n in
-  if i' < 0 then None else Some (Primitives.get_scalar t p b i')
-;;
-
-(* ref *)
-let[@inline] read_table_opt_ref p b i n =
-  let i' = get_indirect p b i n in
-  if i' < 0 then i' else get_val TRef p b i'
-;;
-
-(* struct *)
-let[@inline] read_table_struct p b i n =
-  let i' = get_indirect p b i n in
-  if i' < 0 then invalid_arg "required field not set" else i'
-;;
-
-let[@inline] read_table_opt_struct p b i n =
-  get_indirect p b i n
-;;
-
-
-(* vector *)
-let[@inline] sz_scalar (type a) : a Primitives.ty -> int =
-  Primitives.(function
-      | TBool | TByte | TUByte -> 1
-      | TShort | TUShort -> 2
-      | TInt | TUInt | TFloat -> 4
-      | TLong | TULong | TDouble -> 8)
-;;
-
-let[@inline] sz_val (type a) : a tag -> int =
-  function
-  | TScalar t -> sz_scalar t
-  | TRef -> 4
-  | TStruct { sz; _ } -> sz
-
-let[@inline] unsafe_get_vec t p b i j =
-  get_val t p b (i + 4 + (sz_val t * j))
-;;
-
-let[@inline] length_vec p b i = Primitives.get_uoffset p b i
-
-let[@inline] get_vec t p b i j =
-  if j < length_vec p b i then unsafe_get_vec t p b i j else invalid_arg "index out of bounds"
-;;
-
-let[@inline] to_list_vec t p b i =
-  List.init (length_vec p b i) (fun j -> unsafe_get_vec t p b i j)
-;;
-
-let[@inline] to_array_vec t p b i =
-  Array.init (length_vec p b i) (fun j -> unsafe_get_vec t p b i j)
-;;
-
-let[@inline] to_seq_vec t p b i =
-  let len = length_vec p b i in
-  let rec aux j () =
-    if j < len
-    then (
-      let x = unsafe_get_vec t p b i j in
-      Seq.Cons (x, aux (j + 1)))
-    else Seq.Nil
-  in
-  aux 0
-;;
-
-let[@inline] iter_vec t p b f i =
-  for j = 0 to length_vec p b i - 1 do
-    f (unsafe_get_vec t p b i j)
-  done
-;;
-
 #define VT_VEC_FNS(name_,tag_,prim_) \
     CONCAT(get_vec_,name_) = (fun b i j -> get_vec tag_ prim_ b i j)[@inline] \
   ; CONCAT(to_list_vec_,name_) = (fun b i -> to_list_vec tag_ prim_ b i)[@inline] \
@@ -212,7 +105,7 @@ let[@inline] iter_vec t p b f i =
   ; get_vec = (fun t b i j -> get_vec t prim_ b i j)[@inline] \
   ; to_list_vec = (fun t b i -> to_list_vec t prim_ b i)[@inline] \
   ; to_array_vec = (fun t b i -> to_array_vec t prim_ b i)[@inline] \
-  ; to_seq_vec = (fun t b i -> to_seq_vec  t prim_ b i)[@inline] \
+  ; to_seq_vec = (fun t b i -> to_seq_vec t prim_ b i)[@inline] \
   ; iter_vec = (fun t b f i -> iter_vec t prim_ b f i)[@inline] \
   }
 

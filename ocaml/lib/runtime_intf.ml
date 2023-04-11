@@ -98,9 +98,9 @@ module type Intf_impl = sig
       represented as offsets. Phantom param for safety in generated code *)
 
   type 'b buf
-  type offset
-  type ('b, 't) fb = offset
-  type ('b, 't) fbopt = offset
+  (* type offset *)
+  type ('b, 't) fb = Read.offset
+  type ('b, 't) fbopt = Read.offset
   type 'a wip = Builder.offset
   type 't root = Root : 'b buf * ('b, 't) fb -> 't root
 
@@ -126,10 +126,10 @@ module type Intf_impl = sig
     type default
 
     val size : int
-    val read_offset : 'b buf -> offset -> int -> t
-    val read_table_default : 'b buf -> offset -> int -> default:t -> t
-    val read_table : 'b buf -> offset -> int -> t
-    val read_table_opt : 'b buf -> offset -> int -> t option
+    val read_offset : 'b buf -> Read.offset -> int -> t
+    val read_table_default : 'b buf -> Read.offset -> int -> default:t -> t
+    val read_table : 'b buf -> Read.offset -> int -> t
+    val read_table_opt : 'b buf -> Read.offset -> int -> t option
     val set : Builder.t -> int -> t -> unit
     val push_slot : int -> t -> Builder.t -> Builder.t
     val push_slot_default : int -> default:t -> t -> Builder.t -> Builder.t
@@ -153,9 +153,9 @@ module type Intf_impl = sig
   module Double : ScalarS with type default := float and type t = Primitives.T.double
 
   module Struct : sig
-    val read_offset : 'b buf -> offset -> int -> offset
-    val read_table : 'b buf -> offset -> int -> offset
-    val read_table_opt : 'b buf -> offset -> int -> offset
+    val read_offset : 'b buf -> Read.offset -> int -> Read.offset
+    val read_table : 'b buf -> Read.offset -> int -> Read.offset
+    val read_table_opt : 'b buf -> Read.offset -> int -> Read.offset
 
     val push_slot
       :  (Builder.t -> int -> 'a -> unit)
@@ -171,18 +171,18 @@ module type Intf_impl = sig
 
       val size : int
       val set : Builder.t -> int -> builder_elt -> unit
-    end) : VectorS with type 'b elt := offset and type builder_elt := T.builder_elt
+    end) : VectorS with type 'b elt := Read.offset and type builder_elt := T.builder_elt
   end
 
   module Ref : sig
     val size : int
-    val read_table : 'b buf -> offset -> int -> offset
-    val read_table_opt : 'b buf -> offset -> int -> offset
+    val read_table : 'b buf -> Read.offset -> int -> Read.offset
+    val read_table_opt : 'b buf -> Read.offset -> int -> Read.offset
     val push_slot : int -> Builder.offset -> Builder.t -> Builder.t
     val push_union : int -> int -> UByte.t -> Builder.offset -> Builder.t -> Builder.t
 
     module Vector :
-      VectorS with type 'b elt := offset and type builder_elt := Builder.offset
+      VectorS with type 'b elt := Read.offset and type builder_elt := Builder.offset
   end
 
   module String : sig
