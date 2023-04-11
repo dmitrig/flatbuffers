@@ -26,18 +26,6 @@ val get_soffset : 'b t -> 'b -> int -> int
 
 (** Read from buf *)
 
-val get_bool : 'b t -> 'b -> int -> T.bool
-val get_byte : 'b t -> 'b -> int -> T.byte
-val get_ubyte : 'b t -> 'b -> int -> T.ubyte
-val get_short : 'b t -> 'b -> int -> T.short
-val get_ushort : 'b t -> 'b -> int -> T.ushort
-val get_int : 'b t -> 'b -> int -> T.int
-val get_uint : 'b t -> 'b -> int -> T.uint
-val get_long : 'b t -> 'b -> int -> T.long
-val get_ulong : 'b t -> 'b -> int -> T.ulong
-val get_float : 'b t -> 'b -> int -> T.float
-val get_double : 'b t -> 'b -> int -> T.double
-
 type _ ty =
   | TBool : T.bool ty
   | TByte : T.byte ty
