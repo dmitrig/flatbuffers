@@ -133,7 +133,7 @@ module name_ = struct \
   let size = size_ \
   let[@inline] push_slot f x b = \
     Builder.prep ~align:size ~bytes:size b; \
-    Builder.CONCAT(set_, ty_) b 0 x; \
+    Builder.set_scalar CONCAT(T, name_) b 0 x; \
     Builder.save_slot ~id:f b; \
     b \
   ;; \
@@ -155,7 +155,7 @@ module name_ = struct \
       let len = Array.length a in \
       Builder.start_vector b ~n_elts:len ~elt_size:size_; \
       for i = 0 to len - 1 do \
-        Builder.CONCAT(set_, ty_) b (i * size_) a.(i) \
+        Builder.set_scalar CONCAT(T, name_) b (i * size_) a.(i) \
       done; \
       Builder.end_vector b \
     ;; \
@@ -238,7 +238,7 @@ module Ref = struct
 
   let[@inline] push_union ft fo t o b =
     Builder.prep ~align:UByte.size ~bytes:UByte.size b;
-    Builder.set_ubyte b 0 t;
+    Builder.set_scalar TUByte b 0 t;
     Builder.save_slot ~id:ft b;
     Builder.prep ~align:size ~bytes:size b;
     Builder.set_uoffset b 0 o;

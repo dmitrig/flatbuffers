@@ -113,17 +113,21 @@ let[@inline] get_scalar (type a b) (t : a ty) (prim : b t) (b : b) (i : int) : a
   | TDouble, Bigstring -> Int64.float_of_bits (Bigstringaf.get_int64_le b i)
 ;;
 
-let set_bool b i x = Bytes.set_int8 b i (if x then 1 else 0)
-let set_byte = Bytes.set_int8
-let set_ubyte b i x = Bytes.set_int8 b i (Char.code x)
-let set_short = Bytes.set_int16_le
-let set_ushort = Bytes.set_int16_le
-let set_int = Bytes.set_int32_le
-let set_uint = set_int
-let set_long = Bytes.set_int64_le
-let set_ulong = set_long
-let set_float b i x = Bytes.set_int32_le b i (Int32.bits_of_float x)
-let set_double b i x = Bytes.set_int64_le b i (Int64.bits_of_float x)
+let[@inline] set_scalar (type a) (t : a ty) b i (x : a) =
+  match t with
+  | TBool -> Bytes.set_int8 b i (if x then 1 else 0)
+  | TByte -> Bytes.set_int8 b i x
+  | TUByte -> Bytes.set_int8 b i (Char.code x)
+  | TShort -> Bytes.set_int16_le b i x
+  | TUShort -> Bytes.set_int16_le b i x
+  | TInt -> Bytes.set_int32_le b i x
+  | TUInt -> Bytes.set_int32_le b i x
+  | TLong -> Bytes.set_int64_le b i x
+  | TULong -> Bytes.set_int64_le b i x
+  | TFloat -> Bytes.set_int32_le b i (Int32.bits_of_float x)
+  | TDouble -> Bytes.set_int64_le b i (Int64.bits_of_float x)
+;;
+
 let of_default_bool = Fun.id
 let of_default_byte = Int64.to_int
 let of_default_ubyte x = Char.chr (Int64.to_int x)

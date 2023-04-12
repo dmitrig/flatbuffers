@@ -39,21 +39,8 @@ type _ ty =
   | TFloat : T.float ty
   | TDouble : T.double ty
 
-val get_scalar : 'a ty ->  'b t -> 'b -> int -> 'a
-
-(** Write to bytes in builder *)
-
-val set_bool : bytes -> int -> T.bool -> unit
-val set_byte : bytes -> int -> T.byte -> unit
-val set_ubyte : bytes -> int -> T.ubyte -> unit
-val set_short : bytes -> int -> T.short -> unit
-val set_ushort : bytes -> int -> T.ushort -> unit
-val set_int : bytes -> int -> T.int -> unit
-val set_uint : bytes -> int -> T.uint -> unit
-val set_long : bytes -> int -> T.long -> unit
-val set_ulong : bytes -> int -> T.ulong -> unit
-val set_float : bytes -> int -> T.float -> unit
-val set_double : bytes -> int -> T.double -> unit
+val get_scalar : 'a ty -> 'b t -> 'b -> int -> 'a
+val set_scalar : 'a ty -> bytes -> int -> 'a -> unit
 
 (** Output from bytes in builder *)
 val buf_of_bytes : 'a t -> bytes -> off:int -> len:int -> 'a

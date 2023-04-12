@@ -156,17 +156,9 @@ let save_slot ~id b =
   b.cur_vtable.(id) <- b.length
 ;;
 
-let set_bool b i x = Primitives.set_bool !(b.buf) (current b + i) x
-let set_byte b i x = Primitives.set_byte !(b.buf) (current b + i) x
-let set_ubyte b i x = Primitives.set_ubyte !(b.buf) (current b + i) x
-let set_short b i x = Primitives.set_short !(b.buf) (current b + i) x
-let set_ushort b i x = Primitives.set_ushort !(b.buf) (current b + i) x
-let set_int b i x = Primitives.set_int !(b.buf) (current b + i) x
-let set_uint b i x = Primitives.set_uint !(b.buf) (current b + i) x
-let set_long b i x = Primitives.set_long !(b.buf) (current b + i) x
-let set_ulong b i x = Primitives.set_ulong !(b.buf) (current b + i) x
-let set_float b i x = Primitives.set_float !(b.buf) (current b + i) x
-let set_double b i x = Primitives.set_double !(b.buf) (current b + i) x
+let set_scalar t b i x =
+  Primitives.set_scalar t !(b.buf) (current b + i) x
+
 let set_string b i s = Bytes.blit_string s 0 !(b.buf) (current b + i) (String.length s)
 let set_padding b i n = Bytes.fill !(b.buf) (current b + i) n '\000'
 

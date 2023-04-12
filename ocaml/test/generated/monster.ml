@@ -11,9 +11,9 @@ module Rt = Flatbuffers.Runtime
 module Struct = struct
 
   let set_vec3__0 b i (x_, y_, z_) =
-    Rt.Builder.set_float b (i + 0) x_;
-    Rt.Builder.set_float b (i + 4) y_;
-    Rt.Builder.set_float b (i + 8) z_;
+    Rt.Builder.set_scalar TFloat b (i + 0) x_;
+    Rt.Builder.set_scalar TFloat b (i + 4) y_;
+    Rt.Builder.set_scalar TFloat b (i + 8) z_;
 end
 
 module Union = struct

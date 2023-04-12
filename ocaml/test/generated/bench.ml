@@ -12,17 +12,17 @@ module Struct = struct
 
   let rec set_bar__3 b i (parent_, time_, ratio_, size_) =
     set_foo__2 b (i + 0) parent_;
-    Rt.Builder.set_int b (i + 16) time_;
-    Rt.Builder.set_float b (i + 20) ratio_;
-    Rt.Builder.set_ushort b (i + 24) size_;
+    Rt.Builder.set_scalar TInt b (i + 16) time_;
+    Rt.Builder.set_scalar TFloat b (i + 20) ratio_;
+    Rt.Builder.set_scalar TUShort b (i + 24) size_;
     Rt.Builder.set_padding b (i + 26) 6;
 
   and set_foo__2 b i (id_, count_, prefix_, length_) =
-    Rt.Builder.set_ulong b (i + 0) id_;
-    Rt.Builder.set_short b (i + 8) count_;
-    Rt.Builder.set_byte b (i + 10) prefix_;
+    Rt.Builder.set_scalar TULong b (i + 0) id_;
+    Rt.Builder.set_scalar TShort b (i + 8) count_;
+    Rt.Builder.set_scalar TByte b (i + 10) prefix_;
     Rt.Builder.set_padding b (i + 11) 1;
-    Rt.Builder.set_uint b (i + 12) length_;
+    Rt.Builder.set_scalar TUInt b (i + 12) length_;
 end
 
 module BenchmarksFlatbuffers = struct
