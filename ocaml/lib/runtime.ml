@@ -131,10 +131,9 @@ module name_ = struct \
   let[@inline] read_table (Buf (vt, b)) i n = vt.CONCAT(read_table_, ty_) b i n \
   let[@inline] read_table_opt (Buf (vt, b)) i n = vt.CONCAT(read_table_opt_, ty_) b i n \
   let size = size_ \
-  let[@inline] set b i x = Builder.(CONCAT(set_, ty_)) b i x \
   let[@inline] push_slot f x b = \
     Builder.prep ~align:size ~bytes:size b; \
-    set b 0 x; \
+    Builder.CONCAT(set_, ty_) b 0 x; \
     Builder.save_slot ~id:f b; \
     b \
   ;; \
@@ -142,8 +141,8 @@ module name_ = struct \
     (* use compare since nan <> nan *) \
     if compare x default = 0 then b else push_slot f x b \
   ;; \
-  let[@inline] to_default x = Primitives.(CONCAT(to_default_, ty_)) x \
-  let[@inline] of_default x = Primitives.(CONCAT(of_default_, ty_)) x \
+  let[@inline] to_default x = Primitives.CONCAT(to_default_, ty_) x \
+  let[@inline] of_default x = Primitives.CONCAT(of_default_, ty_) x \
   module Vector = struct \
     type t \
     let[@inline] length (Buf (vt, b)) i = vt.length_vec b i \
@@ -154,9 +153,9 @@ module name_ = struct \
     let[@inline] iter (Buf (vt, b)) f i = vt.CONCAT(iter_vec_,ty_) b f i \
     let[@inline] create b a = \
       let len = Array.length a in \
-      Builder.start_vector b ~n_elts:(Array.length a) ~elt_size:size_; \
+      Builder.start_vector b ~n_elts:len ~elt_size:size_; \
       for i = 0 to len - 1 do \
-        set b (i * size_) a.(i) \
+        Builder.CONCAT(set_, ty_) b (i * size_) a.(i) \
       done; \
       Builder.end_vector b \
     ;; \

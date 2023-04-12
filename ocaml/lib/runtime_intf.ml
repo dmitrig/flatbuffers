@@ -125,12 +125,10 @@ module type Intf_impl = sig
     type t
     type default
 
-    val size : int
     val read_offset : 'b buf -> Read.offset -> int -> t
     val read_table_default : 'b buf -> Read.offset -> int -> default:t -> t
     val read_table : 'b buf -> Read.offset -> int -> t
     val read_table_opt : 'b buf -> Read.offset -> int -> t option
-    val set : Builder.t -> int -> t -> unit
     val push_slot : int -> t -> Builder.t -> Builder.t
     val push_slot_default : int -> default:t -> t -> Builder.t -> Builder.t
     val of_default : default -> t

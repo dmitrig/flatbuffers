@@ -11,8 +11,8 @@ module Rt = Flatbuffers.Runtime
 module Struct = struct
 
   let rec set_ability__4 b i (id_, distance_) =
-    Rt.UInt.set b (i + 0) id_;
-    Rt.UInt.set b (i + 4) distance_;
+    Rt.Builder.set_uint b (i + 0) id_;
+    Rt.Builder.set_uint b (i + 4) distance_;
 
   and set_struct_of_structs__6 b i (a_, b_, c_) =
     set_ability__4 b (i + 0) a_;
@@ -23,23 +23,23 @@ module Struct = struct
     set_struct_of_structs__6 b (i + 0) a_;
 
   and set_test__5 b i (a_, b_) =
-    Rt.Short.set b (i + 0) a_;
-    Rt.Byte.set b (i + 2) b_;
+    Rt.Builder.set_short b (i + 0) a_;
+    Rt.Builder.set_byte b (i + 2) b_;
     Rt.Builder.set_padding b (i + 3) 1;
 
   and set_vec3__8 b i (x_, y_, z_, test1_, test2_, test3_) =
-    Rt.Float.set b (i + 0) x_;
-    Rt.Float.set b (i + 4) y_;
-    Rt.Float.set b (i + 8) z_;
+    Rt.Builder.set_float b (i + 0) x_;
+    Rt.Builder.set_float b (i + 4) y_;
+    Rt.Builder.set_float b (i + 8) z_;
     Rt.Builder.set_padding b (i + 12) 4;
-    Rt.Double.set b (i + 16) test1_;
-    Rt.UByte.set b (i + 24) test2_;
+    Rt.Builder.set_double b (i + 16) test1_;
+    Rt.Builder.set_ubyte b (i + 24) test2_;
     Rt.Builder.set_padding b (i + 25) 1;
     set_test__5 b (i + 26) test3_;
     Rt.Builder.set_padding b (i + 30) 2;
 
   and set_unused__9 b i (a_) =
-    Rt.Int.set b (i + 0) a_;
+    Rt.Builder.set_int b (i + 0) a_;
 end
 
 module Union = struct

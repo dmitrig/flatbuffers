@@ -652,7 +652,8 @@ class OCamlBfbsGenerator : public BaseBfbsGenerator {
   std::string StructSetFn(const r::Type *type) {
     const r::BaseType base_type = type->base_type();
     if (IsScalar(base_type)) {
-      return GenerateImplNs(type) + ".set";
+      return RuntimeNS + ".Builder.set_" +
+             namer_.Function(r::EnumNameBaseType(base_type));
     } else if (base_type == r::Obj) {
       auto object = GetObject(type);
       if (object->is_struct()) return StructSetIdent(object);
