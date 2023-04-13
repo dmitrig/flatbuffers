@@ -59,17 +59,8 @@ let[@inline] read_table_struct p b i n =
 let[@inline] read_table_opt_struct p b i n = get_indirect p b i n
 
 (* vector *)
-let[@inline] sz_scalar (type a) : a Primitives.ty -> int =
-  Primitives.(
-    function
-    | TBool | TByte | TUByte -> 1
-    | TShort | TUShort -> 2
-    | TInt | TUInt | TFloat -> 4
-    | TLong | TULong | TDouble -> 8)
-;;
-
 let[@inline] sz_val (type a) : a tag -> int = function
-  | TScalar t -> sz_scalar t
+  | TScalar t -> Primitives.size_scalar t
   | TRef -> 4
   | TStruct { sz; _ } -> sz
 ;;

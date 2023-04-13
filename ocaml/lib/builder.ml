@@ -156,9 +156,7 @@ let save_slot ~id b =
   b.cur_vtable.(id) <- b.length
 ;;
 
-let set_scalar t b i x =
-  Primitives.set_scalar t !(b.buf) (current b + i) x
-
+let[@inline] set_scalar t b i x = Primitives.set_scalar t !(b.buf) (current b + i) x
 let set_string b i s = Bytes.blit_string s 0 !(b.buf) (current b + i) (String.length s)
 let set_padding b i n = Bytes.fill !(b.buf) (current b + i) n '\000'
 
@@ -167,6 +165,45 @@ let set_uoffset b i o =
   let i' = current b + i in
   let b' = !(b.buf) in
   Bytes.set_int32_le b' i' (Int32.of_int (Bytes.length b' - o - i'))
+;;
+
+let push_slot_scalar t f x b =
+  let size = Primitives.size_scalar t in
+  prep ~align:size ~bytes:size b;
+  set_scalar t b 0 x;
+  save_slot ~id:f b;
+  b
+;;
+
+let push_slot_scalar_default t f ~default x b =
+  (* use compare since nan <> nan *)
+  if compare x default = 0 then b else push_slot_scalar t f x b
+;;
+
+let push_slot_ref f x b =
+  let size = 4 in
+  prep ~align:size ~bytes:size b;
+  set_uoffset b 0 x;
+  save_slot ~id:f b;
+  b
+;;
+
+let[@inline] push_slot_union ft fo t o b =
+  let size = 4 in
+  prep ~align:1 ~bytes:1 b;
+  set_scalar TUByte b 0 t;
+  save_slot ~id:ft b;
+  prep ~align:size ~bytes:size b;
+  set_uoffset b 0 o;
+  save_slot ~id:fo b;
+  b
+;;
+
+let[@inline] push_slot_struct set size align f s b =
+  prep ~align ~bytes:size b;
+  set b 0 s;
+  save_slot ~id:f b;
+  b
 ;;
 
 let find_shared_string b s = Hashtbl.find_opt b.strings s
@@ -192,6 +229,55 @@ let end_vector b =
   (* skip over size added in start_vector *)
   b.length <- b.length + vector_len_size;
   current_offset b
+;;
+
+let create_vector t b a =
+  let size = Primitives.size_scalar t in
+  let len = Array.length a in
+  start_vector b ~n_elts:len ~elt_size:size;
+  for i = 0 to len - 1 do
+    set_scalar t b (i * size) a.(i)
+  done;
+  end_vector b
+;;
+
+let create_vector_ref b a =
+  (* TODO *)
+  let size = 4 in
+  let len = Array.length a in
+  start_vector b ~n_elts:len ~elt_size:size;
+  for i = 0 to len - 1 do
+    set_uoffset b (i * size) a.(i)
+  done;
+  end_vector b
+;;
+
+let create_vector_struct set ~size b a =
+  let len = Array.length a in
+  start_vector b ~n_elts:len ~elt_size:size;
+  for i = 0 to len - 1 do
+    set b (i * size) a.(i)
+  done;
+  end_vector b
+;;
+
+let create_string b s =
+  (* ensure null terminator; there may be more padding inserted *)
+  prep b ~align:1 ~bytes:1;
+  set_padding b 0 1;
+  (* string is a regular ubyte vectory otherwise *)
+  start_vector b ~n_elts:(String.length s) ~elt_size:1;
+  set_string b 0 s;
+  end_vector b
+;;
+
+let create_shared_string b s =
+  match find_shared_string b s with
+  | Some o -> o
+  | None ->
+    let o = create_string b s in
+    add_shared_string b s o;
+    o
 ;;
 
 let start_table b ~n_fields =
@@ -240,7 +326,7 @@ let end_table b =
   table_offset
 ;;
 
-let finish?identifier ?(size_prefixed = false) prim b o =
+let finish ?identifier ?(size_prefixed = false) prim b o =
   assert_nested b false;
   let ident_length = Option.fold identifier ~none:0 ~some:String.length in
   let offset_length = 4 in

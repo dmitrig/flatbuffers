@@ -27,6 +27,16 @@ val set_uoffset : t -> int -> offset -> unit
 val set_string : t -> int -> string -> unit
 val set_padding : t -> int -> int -> unit
 
-(* shared strings *)
-val find_shared_string : t -> string -> offset option
-val add_shared_string : t -> string -> offset -> unit
+(* push *)
+val push_slot_scalar : 'a Primitives.ty -> int -> 'a -> t -> t
+val push_slot_scalar_default : 'a Primitives.ty -> int -> default:'a -> 'a -> t -> t
+val push_slot_ref : int -> offset -> t -> t
+val push_slot_union : int -> int -> Primitives.T.ubyte -> offset -> t -> t
+val push_slot_struct : (t -> int -> 'a -> unit) -> int -> int -> int -> 'a -> t -> t
+
+(* vectors *)
+val create_vector : 'a Primitives.ty -> t -> 'a array -> offset
+val create_vector_ref : t -> offset array -> offset
+val create_vector_struct : (t -> int -> 'a -> unit) -> size:int -> t -> 'a array -> offset
+val create_string : t -> string -> offset
+val create_shared_string : t -> string -> offset

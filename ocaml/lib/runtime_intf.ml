@@ -90,7 +90,6 @@ end
 
 (** Full runtime lib interface, only for use by generated code *)
 module type Intf_impl = sig
-
   (* builder with same scalar types *)
   module Builder = Builder
 
@@ -98,6 +97,7 @@ module type Intf_impl = sig
       represented as offsets. Phantom param for safety in generated code *)
 
   type 'b buf
+
   (* type offset *)
   type ('b, 't) fb = Read.offset
   type ('b, 't) fbopt = Read.offset
@@ -173,7 +173,6 @@ module type Intf_impl = sig
   end
 
   module Ref : sig
-    val size : int
     val read_table : 'b buf -> Read.offset -> int -> Read.offset
     val read_table_opt : 'b buf -> Read.offset -> int -> Read.offset
     val push_slot : int -> Builder.offset -> Builder.t -> Builder.t

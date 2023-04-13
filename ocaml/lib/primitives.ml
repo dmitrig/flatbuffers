@@ -76,6 +76,13 @@ type _ ty =
   | TFloat : T.float ty
   | TDouble : T.double ty
 
+let[@inline] size_scalar (type a) : a ty -> int = function
+  | TBool | TByte | TUByte -> 1
+  | TShort | TUShort -> 2
+  | TInt | TUInt | TFloat -> 4
+  | TLong | TULong | TDouble -> 8
+;;
+
 let[@inline] get_scalar (type a b) (t : a ty) (prim : b t) (b : b) (i : int) : a =
   match t, prim with
   | TBool, Bytes -> Bytes.get b i == '\001'

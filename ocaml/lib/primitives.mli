@@ -39,6 +39,7 @@ type _ ty =
   | TFloat : T.float ty
   | TDouble : T.double ty
 
+val size_scalar : 'a ty -> int
 val get_scalar : 'a ty -> 'b t -> 'b -> int -> 'a
 val set_scalar : 'a ty -> bytes -> int -> 'a -> unit
 

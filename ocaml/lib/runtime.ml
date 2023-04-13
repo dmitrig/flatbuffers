@@ -2,25 +2,23 @@ module type Intf = Runtime_intf.Intf
 
 module Builder = Builder
 
-open Read
-
 #define VT_VEC_SIGS(name_,ty_) \
-    CONCAT(get_vec_,name_) : 'b -> offset -> int -> ty_ \
-  ; CONCAT(to_list_vec_,name_) : 'b -> offset -> ty_ list \
-  ; CONCAT(to_array_vec_,name_) : 'b -> offset -> ty_ array \
-  ; CONCAT(to_seq_vec_,name_) : 'b -> offset -> ty_ Seq.t \
-  ; CONCAT(iter_vec_,name_) : 'b -> (ty_ -> unit) -> offset -> unit
+    CONCAT(get_vec_,name_) : 'b -> Read.offset -> int -> ty_ \
+  ; CONCAT(to_list_vec_,name_) : 'b -> Read.offset -> ty_ list \
+  ; CONCAT(to_array_vec_,name_) : 'b -> Read.offset -> ty_ array \
+  ; CONCAT(to_seq_vec_,name_) : 'b -> Read.offset -> ty_ Seq.t \
+  ; CONCAT(iter_vec_,name_) : 'b -> (ty_ -> unit) -> Read.offset -> unit
 
 #define VT_SCALAR_SIGS(name_,ty_) \
-    CONCAT(read_offset_,name_) : 'b -> offset -> int -> ty_ \
-  ; CONCAT(read_table_,name_) : 'b -> offset -> int -> ty_ \
-  ; CONCAT(read_table_opt_,name_) : 'b -> offset -> int -> ty_ option \
-  ; CONCAT(read_table_default_,name_) : 'b -> offset -> int -> default:ty_ -> ty_ \
+    CONCAT(read_offset_,name_) : 'b -> Read.offset -> int -> ty_ \
+  ; CONCAT(read_table_,name_) : 'b -> Read.offset -> int -> ty_ \
+  ; CONCAT(read_table_opt_,name_) : 'b -> Read.offset -> int -> ty_ option \
+  ; CONCAT(read_table_default_,name_) : 'b -> Read.offset -> int -> default:ty_ -> ty_ \
   ; VT_VEC_SIGS(name_,ty_)
 
 type 'b vt =
-  { length_vec : 'b -> offset -> int
-  ; get_string : 'b -> offset -> string
+  { length_vec : 'b -> Read.offset -> int
+  ; get_string : 'b -> Read.offset -> string
   (* scalar *)
   ; VT_SCALAR_SIGS(bool, Primitives.T.bool)
   ; VT_SCALAR_SIGS(byte, Primitives.T.byte)
@@ -34,23 +32,23 @@ type 'b vt =
   ; VT_SCALAR_SIGS(float, Primitives.T.float)
   ; VT_SCALAR_SIGS(double, Primitives.T.double)
   (* ref *)
-  ; read_table_ref : 'b -> offset -> int -> offset
-  ; read_table_opt_ref : 'b -> offset -> int -> offset
-  ; VT_VEC_SIGS(ref, offset)
+  ; read_table_ref : 'b -> Read.offset -> int -> Read.offset
+  ; read_table_opt_ref : 'b -> Read.offset -> int -> Read.offset
+  ; VT_VEC_SIGS(ref, Read.offset)
   (* struct *)
-  ; read_table_struct : 'b -> offset -> int -> offset
-  ; read_table_opt_struct : 'b -> offset -> int -> offset
+  ; read_table_struct : 'b -> Read.offset -> int -> Read.offset
+  ; read_table_opt_struct : 'b -> Read.offset -> int -> Read.offset
   (* generic ops *)
-  ; get_vec : 'a. 'a tag -> 'b -> int -> int -> 'a
-  ; to_list_vec : 'a. 'a tag -> 'b -> int -> 'a list
-  ; to_array_vec : 'a. 'a tag -> 'b -> int -> 'a array
-  ; to_seq_vec : 'a. 'a tag -> 'b -> int -> 'a Seq.t
-  ; iter_vec : 'a. 'a tag -> 'b -> ('a -> unit) -> int -> unit
+  ; get_vec : 'a. 'a Read.tag -> 'b -> int -> int -> 'a
+  ; to_list_vec : 'a. 'a Read.tag -> 'b -> int -> 'a list
+  ; to_array_vec : 'a. 'a Read.tag -> 'b -> int -> 'a array
+  ; to_seq_vec : 'a. 'a Read.tag -> 'b -> int -> 'a Seq.t
+  ; iter_vec : 'a. 'a Read.tag -> 'b -> ('a -> unit) -> int -> unit
   }
 
 type 'b buf = Buf : 'a vt * 'a -> 'b buf
-type ('b, 't) fb = offset
-type ('b, 't) fbopt = offset
+type ('b, 't) fb = Read.offset
+type ('b, 't) fbopt = Read.offset
 type 'a wip = Builder.offset
 type 't root = Root : 'b buf * ('b, 't) fb -> 't root
 
@@ -69,22 +67,22 @@ module type VectorS = sig
 end
 
 #define VT_VEC_FNS(name_,tag_,prim_) \
-    CONCAT(get_vec_,name_) = (fun b i j -> get_vec tag_ prim_ b i j)[@inline] \
-  ; CONCAT(to_list_vec_,name_) = (fun b i -> to_list_vec tag_ prim_ b i)[@inline] \
-  ; CONCAT(to_array_vec_,name_) = (fun b i -> to_array_vec tag_ prim_ b i)[@inline] \
-  ; CONCAT(to_seq_vec_,name_) = (fun b i -> to_seq_vec  tag_ prim_ b i)[@inline] \
-  ; CONCAT(iter_vec_,name_) = (fun b f i -> iter_vec tag_ prim_ b f i)[@inline]
+    CONCAT(get_vec_,name_) = (fun b i j -> Read.get_vec tag_ prim_ b i j)[@inline] \
+  ; CONCAT(to_list_vec_,name_) = (fun b i -> Read.to_list_vec tag_ prim_ b i)[@inline] \
+  ; CONCAT(to_array_vec_,name_) = (fun b i -> Read.to_array_vec tag_ prim_ b i)[@inline] \
+  ; CONCAT(to_seq_vec_,name_) = (fun b i -> Read.to_seq_vec  tag_ prim_ b i)[@inline] \
+  ; CONCAT(iter_vec_,name_) = (fun b f i -> Read.iter_vec tag_ prim_ b f i)[@inline]
 
 #define VT_SCALAR_FNS(name_,tag_,prim_) \
-    CONCAT(read_offset_,name_) = (fun b i off -> get_val (TScalar tag_) prim_ b (i + off))[@inline] \
-  ; CONCAT(read_table_,name_) = (fun b i n -> read_table (TScalar tag_) prim_ b i n)[@inline] \
-  ; CONCAT(read_table_opt_,name_) = (fun b i n -> read_table_opt tag_ prim_ b i n)[@inline] \
-  ; CONCAT(read_table_default_,name_) = (fun b i n ~default -> read_table_default tag_ prim_ b i n ~default)[@inline] \
+    CONCAT(read_offset_,name_) = (fun b i off -> Read.get_val (TScalar tag_) prim_ b (i + off))[@inline] \
+  ; CONCAT(read_table_,name_) = (fun b i n -> Read.read_table (TScalar tag_) prim_ b i n)[@inline] \
+  ; CONCAT(read_table_opt_,name_) = (fun b i n -> Read.read_table_opt tag_ prim_ b i n)[@inline] \
+  ; CONCAT(read_table_default_,name_) = (fun b i n ~default -> Read.read_table_default tag_ prim_ b i n ~default)[@inline] \
   ; VT_VEC_FNS(name_,(TScalar tag_),prim_)
 
 #define VT(prim_) \
-  { length_vec = (fun b i -> length_vec prim_ b i) \
-  ; get_string = (fun b i -> get_string prim_ b i) \
+  { length_vec = (fun b i -> Read.length_vec prim_ b i) \
+  ; get_string = (fun b i -> Read.get_string prim_ b i) \
   ; VT_SCALAR_FNS(bool, Primitives.TBool, prim_) \
   ; VT_SCALAR_FNS(byte, Primitives.TByte, prim_) \
   ; VT_SCALAR_FNS(ubyte, Primitives.TUByte, prim_) \
@@ -97,18 +95,18 @@ end
   ; VT_SCALAR_FNS(float, Primitives.TFloat, prim_) \
   ; VT_SCALAR_FNS(double, Primitives.TDouble, prim_) \
   (* ref *) \
-  ; read_table_ref = (fun b i n -> read_table TRef prim_ b i n) \
-  ; read_table_opt_ref = (fun b i n -> read_table_opt_ref prim_ b i n) \
+  ; read_table_ref = (fun b i n -> Read.read_table TRef prim_ b i n) \
+  ; read_table_opt_ref = (fun b i n -> Read.read_table_opt_ref prim_ b i n) \
   ; VT_VEC_FNS(ref, TRef, prim_) \
   (* struct *) \
-  ; read_table_struct = (fun b i n -> read_table_struct prim_ b i n) \
-  ; read_table_opt_struct = (fun b i n -> read_table_opt_struct prim_ b i n) \
+  ; read_table_struct = (fun b i n -> Read.read_table_struct prim_ b i n) \
+  ; read_table_opt_struct = (fun b i n -> Read.read_table_opt_struct prim_ b i n) \
   (* generic ops *) \
-  ; get_vec = (fun t b i j -> get_vec t prim_ b i j)[@inline] \
-  ; to_list_vec = (fun t b i -> to_list_vec t prim_ b i)[@inline] \
-  ; to_array_vec = (fun t b i -> to_array_vec t prim_ b i)[@inline] \
-  ; to_seq_vec = (fun t b i -> to_seq_vec t prim_ b i)[@inline] \
-  ; iter_vec = (fun t b f i -> iter_vec t prim_ b f i)[@inline] \
+  ; get_vec = (fun t b i j -> Read.get_vec t prim_ b i j)[@inline] \
+  ; to_list_vec = (fun t b i -> Read.to_list_vec t prim_ b i)[@inline] \
+  ; to_array_vec = (fun t b i -> Read.to_array_vec t prim_ b i)[@inline] \
+  ; to_seq_vec = (fun t b i -> Read.to_seq_vec t prim_ b i)[@inline] \
+  ; iter_vec = (fun t b f i -> Read.iter_vec t prim_ b f i)[@inline] \
   }
 
 let vt_bytes = VT(Primitives.Bytes)
@@ -130,17 +128,8 @@ module name_ = struct \
   let[@inline] read_table_default (Buf (vt, b)) i n ~default = vt.CONCAT(read_table_default_, ty_) b i n ~default \
   let[@inline] read_table (Buf (vt, b)) i n = vt.CONCAT(read_table_, ty_) b i n \
   let[@inline] read_table_opt (Buf (vt, b)) i n = vt.CONCAT(read_table_opt_, ty_) b i n \
-  let size = size_ \
-  let[@inline] push_slot f x b = \
-    Builder.prep ~align:size ~bytes:size b; \
-    Builder.set_scalar CONCAT(T, name_) b 0 x; \
-    Builder.save_slot ~id:f b; \
-    b \
-  ;; \
-  let[@inline] push_slot_default f ~default x b = \
-    (* use compare since nan <> nan *) \
-    if compare x default = 0 then b else push_slot f x b \
-  ;; \
+  let[@inline] push_slot f x b = Builder.push_slot_scalar CONCAT(T,name_) f x b \
+  let[@inline] push_slot_default f ~default x b = Builder.push_slot_scalar_default CONCAT(T, name_) f ~default x b \
   let[@inline] to_default x = Primitives.CONCAT(to_default_, ty_) x \
   let[@inline] of_default x = Primitives.CONCAT(of_default_, ty_) x \
   module Vector = struct \
@@ -151,14 +140,7 @@ module name_ = struct \
     let[@inline] to_array (Buf (vt, b)) i = vt.CONCAT(to_array_vec_,ty_) b i \
     let[@inline] to_seq (Buf (vt, b)) i = vt.CONCAT(to_seq_vec_,ty_) b i \
     let[@inline] iter (Buf (vt, b)) f i = vt.CONCAT(iter_vec_,ty_) b f i \
-    let[@inline] create b a = \
-      let len = Array.length a in \
-      Builder.start_vector b ~n_elts:len ~elt_size:size_; \
-      for i = 0 to len - 1 do \
-        Builder.set_scalar CONCAT(T, name_) b (i * size_) a.(i) \
-      done; \
-      Builder.end_vector b \
-    ;; \
+    let[@inline] create b a = Builder.create_vector CONCAT(T,name_) b a \
   end \
 end
 
@@ -180,14 +162,7 @@ module Struct = struct
   let[@inline] read_offset _ i off = i + off
   let[@inline] read_table (Buf (vt, b)) i n = vt.read_table_struct b i n
   let[@inline] read_table_opt (Buf (vt, b)) i n = vt.read_table_opt_struct b i n
-
-  (* uses generated set function *)
-  let[@inline] push_slot set size align f s b =
-    Builder.prep ~align ~bytes:size b;
-    set b 0 s;
-    Builder.save_slot ~id:f b;
-    b
-  ;;
+  let push_slot = Builder.push_slot_struct
 
   module Vector (T : sig
     type builder_elt
@@ -204,21 +179,14 @@ module Struct = struct
        are indirected through the vtable.
      *)
     type t
-    let tag = TStruct { sz = T.size; align = 0 }
+    let tag = Read.TStruct { sz = T.size; align = 0 }
     let[@inline] length (Buf (vt, b)) i = vt.length_vec b i
     let[@inline] get (Buf (vt, b)) i j = vt.get_vec tag b i j
     let[@inline] to_list (Buf (vt, b)) i = vt.to_list_vec tag b i
     let[@inline] to_array (Buf (vt, b)) i = vt.to_array_vec tag b i
     let[@inline] to_seq (Buf (vt, b)) i = vt.to_seq_vec tag b i
     let[@inline] iter (Buf (vt, b)) f i = vt.iter_vec tag b f i
-    let[@inline] create b a =
-      let len = Array.length a in
-      Builder.start_vector b ~n_elts:(Array.length a) ~elt_size:T.size;
-      for i = 0 to len - 1 do
-        T.set b (i * T.size) a.(i)
-      done;
-      Builder.end_vector b
-    ;;
+    let[@inline] create b a = Builder.create_vector_struct T.set ~size:T.size b a
   end
 
 end
@@ -226,25 +194,8 @@ end
 module Ref = struct
   let[@inline] read_table (Buf (vt, b)) i n = vt.read_table_ref b i n
   let[@inline] read_table_opt (Buf (vt, b)) i n = vt.read_table_opt_ref b i n
-
-  let size = 4
-
-  let[@inline] push_slot f x b =
-    Builder.prep ~align:size ~bytes:size b;
-    Builder.set_uoffset b 0 x;
-    Builder.save_slot ~id:f b;
-    b
-  ;;
-
-  let[@inline] push_union ft fo t o b =
-    Builder.prep ~align:UByte.size ~bytes:UByte.size b;
-    Builder.set_scalar TUByte b 0 t;
-    Builder.save_slot ~id:ft b;
-    Builder.prep ~align:size ~bytes:size b;
-    Builder.set_uoffset b 0 o;
-    Builder.save_slot ~id:fo b;
-    b
-  ;;
+  let[@inline] push_slot f x b = Builder.push_slot_ref f x b
+  let[@inline] push_union ft fo t o b = Builder.push_slot_union ft fo t o b
 
   module Vector = struct
     type t
@@ -254,14 +205,7 @@ module Ref = struct
     let[@inline] to_array (Buf (vt, b)) i = vt.to_array_vec_ref b i
     let[@inline] to_seq (Buf (vt, b)) i = vt.to_seq_vec_ref b i
     let[@inline] iter (Buf (vt, b)) f i = vt.iter_vec_ref b f i
-    let[@inline] create b a =
-      let len = Array.length a in
-      Builder.start_vector b ~n_elts:(Array.length a) ~elt_size:size;
-      for i = 0 to len - 1 do
-        Builder.set_uoffset b (i * size) a.(i)
-      done;
-      Builder.end_vector b
-    ;;
+    let[@inline] create b a = Builder.create_vector_ref b a
   end
 end
 
@@ -269,37 +213,20 @@ module String = struct
   include UByte.Vector
 
   let[@inline] to_string (Buf (vt, b)) i = vt.get_string b i
-
-  let[@inline] create b s =
-    (* ensure null terminator; there may be more padding inserted *)
-    Builder.prep b ~align:1 ~bytes:UByte.size;
-    Builder.set_padding b 0 1;
-    (* string is a regular ubyte vectory otherwise *)
-    Builder.start_vector b ~n_elts:(String.length s) ~elt_size:UByte.size;
-    Builder.set_string b 0 s;
-    Builder.end_vector b
-  ;;
-
-  let[@inline] create_shared b s =
-    match Builder.find_shared_string b s with
-    | Some o -> o
-    | None ->
-      let o = create b s in
-      Builder.add_shared_string b s o;
-      o
-  ;;
+  let[@inline] create b s = Builder.create_string b s
+  let[@inline] create_shared b s = Builder.create_shared_string b s
 
   module Vector = Ref.Vector
 end
 
 let[@inline] get_root ?(off = 0) ?(size_prefixed = false) (t: 'b Primitives.t) (b: 'b) =
-  let start = off + if size_prefixed then UInt.size else 0 in
+  let start = off + if size_prefixed then 4 else 0 in
   let buf = Buf (vt_of t, b) in
-  Root (buf, get_val TRef t b start)
+  Root (buf, Read.get_val TRef t b start)
 ;;
 
 let get_identifier ?(off = 0) ?(size_prefixed = false) (t: 'b Primitives.t) (b: 'b) =
-  let ident_start = off + Ref.size + if size_prefixed then UInt.size else 0 in
+  let ident_start = off + 4 + if size_prefixed then 4 else 0 in
   Primitives.get_string t b ~off:ident_start ~len:4
 ;;
 
@@ -319,4 +246,3 @@ end
 #undef VT_SCALAR_FNS
 #undef VT
 #undef SCALAR
-#undef VECTOR
