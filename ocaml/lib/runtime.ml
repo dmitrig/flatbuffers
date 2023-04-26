@@ -2,19 +2,16 @@ module type Intf = Runtime_intf.Intf
 
 module Builder = Builder
 
-#define VT_VEC_SIGS(name_,ty_) \
-    CONCAT(get_vec_,name_) : 'b -> Read.offset -> int -> ty_ \
-  ; CONCAT(to_list_vec_,name_) : 'b -> Read.offset -> ty_ list \
-  ; CONCAT(to_array_vec_,name_) : 'b -> Read.offset -> ty_ array \
-  ; CONCAT(to_seq_vec_,name_) : 'b -> Read.offset -> ty_ Seq.t \
-  ; CONCAT(iter_vec_,name_) : 'b -> (ty_ -> unit) -> Read.offset -> unit
-
 #define VT_SCALAR_SIGS(name_,ty_) \
     CONCAT(read_offset_,name_) : 'b -> Read.offset -> int -> ty_ \
   ; CONCAT(read_table_,name_) : 'b -> Read.offset -> int -> ty_ \
   ; CONCAT(read_table_opt_,name_) : 'b -> Read.offset -> int -> ty_ option \
   ; CONCAT(read_table_default_,name_) : 'b -> Read.offset -> int -> default:ty_ -> ty_ \
-  ; VT_VEC_SIGS(name_,ty_)
+  ; CONCAT(get_vec_,name_) : 'b -> Read.offset -> int -> ty_ \
+  ; CONCAT(to_list_vec_,name_) : 'b -> Read.offset -> ty_ list \
+  ; CONCAT(to_array_vec_,name_) : 'b -> Read.offset -> ty_ array \
+  ; CONCAT(to_seq_vec_,name_) : 'b -> Read.offset -> ty_ Seq.t \
+  ; CONCAT(iter_vec_,name_) : 'b -> (ty_ -> unit) -> Read.offset -> unit
 
 type 'b vt =
   { length_vec : 'b -> Read.offset -> int
@@ -34,7 +31,11 @@ type 'b vt =
   (* ref *)
   ; read_table_ref : 'b -> Read.offset -> int -> Read.offset
   ; read_table_opt_ref : 'b -> Read.offset -> int -> Read.offset
-  ; VT_VEC_SIGS(ref, Read.offset)
+  ; get_vec_ref : 'b -> Read.offset -> int -> Read.offset
+  ; to_list_vec_ref : 'b -> Read.offset -> Read.offset list
+  ; to_array_vec_ref : 'b -> Read.offset -> Read.offset array
+  ; to_seq_vec_ref : 'b -> Read.offset -> Read.offset Seq.t
+  ; iter_vec_ref : 'b -> (Read.offset -> unit) -> Read.offset -> unit
   (* struct *)
   ; read_table_struct : 'b -> Read.offset -> int -> Read.offset
   ; read_table_opt_struct : 'b -> Read.offset -> int -> Read.offset
@@ -66,19 +67,16 @@ module type VectorS = sig
   val create : Builder.t -> builder_elt array -> t wip
 end
 
-#define VT_VEC_FNS(name_,tag_,prim_) \
-    CONCAT(get_vec_,name_) = (fun b i j -> Read.get_vec tag_ prim_ b i j)[@inline] \
-  ; CONCAT(to_list_vec_,name_) = (fun b i -> Read.to_list_vec tag_ prim_ b i)[@inline] \
-  ; CONCAT(to_array_vec_,name_) = (fun b i -> Read.to_array_vec tag_ prim_ b i)[@inline] \
-  ; CONCAT(to_seq_vec_,name_) = (fun b i -> Read.to_seq_vec  tag_ prim_ b i)[@inline] \
-  ; CONCAT(iter_vec_,name_) = (fun b f i -> Read.iter_vec tag_ prim_ b f i)[@inline]
-
 #define VT_SCALAR_FNS(name_,tag_,prim_) \
     CONCAT(read_offset_,name_) = (fun b i off -> Read.get_val (TScalar tag_) prim_ b (i + off))[@inline] \
   ; CONCAT(read_table_,name_) = (fun b i n -> Read.read_table (TScalar tag_) prim_ b i n)[@inline] \
   ; CONCAT(read_table_opt_,name_) = (fun b i n -> Read.read_table_opt tag_ prim_ b i n)[@inline] \
   ; CONCAT(read_table_default_,name_) = (fun b i n ~default -> Read.read_table_default tag_ prim_ b i n ~default)[@inline] \
-  ; VT_VEC_FNS(name_,(TScalar tag_),prim_)
+  ; CONCAT(get_vec_,name_) = (fun b i j -> Read.get_vec (TScalar tag_) prim_ b i j)[@inline] \
+  ; CONCAT(to_list_vec_,name_) = (fun b i -> Read.to_list_vec (TScalar tag_) prim_ b i)[@inline] \
+  ; CONCAT(to_array_vec_,name_) = (fun b i -> Read.to_array_vec (TScalar tag_) prim_ b i)[@inline] \
+  ; CONCAT(to_seq_vec_,name_) = (fun b i -> Read.to_seq_vec  (TScalar tag_) prim_ b i)[@inline] \
+  ; CONCAT(iter_vec_,name_) = (fun b f i -> Read.iter_vec (TScalar tag_) prim_ b f i)[@inline]
 
 #define VT(prim_) \
   { length_vec = (fun b i -> Read.length_vec prim_ b i) \
@@ -97,7 +95,11 @@ end
   (* ref *) \
   ; read_table_ref = (fun b i n -> Read.read_table TRef prim_ b i n) \
   ; read_table_opt_ref = (fun b i n -> Read.read_table_opt_ref prim_ b i n) \
-  ; VT_VEC_FNS(ref, TRef, prim_) \
+  ; get_vec_ref = (fun b i j -> Read.get_vec TRef prim_ b i j)[@inline] \
+  ; to_list_vec_ref = (fun b i -> Read.to_list_vec TRef prim_ b i)[@inline] \
+  ; to_array_vec_ref = (fun b i -> Read.to_array_vec TRef prim_ b i)[@inline] \
+  ; to_seq_vec_ref = (fun b i -> Read.to_seq_vec  TRef prim_ b i)[@inline] \
+  ; iter_vec_ref = (fun b f i -> Read.iter_vec TRef prim_ b f i)[@inline] \
   (* struct *) \
   ; read_table_struct = (fun b i n -> Read.read_table_struct prim_ b i n) \
   ; read_table_opt_struct = (fun b i n -> Read.read_table_opt_struct prim_ b i n) \
